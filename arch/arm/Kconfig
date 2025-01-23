@@ -779,6 +779,22 @@ config ARCH_IPQ40XX
 	imply CMD_DM
 	imply OF_UPSTREAM
 
+config ARCH_IPQ
+	bool "Qualcomm IPQ SoCs"
+	select DM
+	select DM_GPIO
+	select DM_SERIAL
+	select DM_RESET
+	select POWER_DOMAIN
+	select GPIO_EXTRA_HEADER
+	select PINCTRL
+	select CLK
+	select OF_CONTROL
+	select SMEM
+	select MSM_SMEM
+	imply OF_UPSTREAM
+	imply CMD_DM
+
 config ARCH_KEYSTONE
 	bool "TI Keystone"
 	select CMD_DDR3
@@ -2267,6 +2283,8 @@ source "arch/arm/mach-histb/Kconfig"
 source "arch/arm/mach-integrator/Kconfig"
 
 source "arch/arm/mach-ipq40xx/Kconfig"
+
+source "arch/arm/mach-ipq/Kconfig"
 
 source "arch/arm/mach-k3/Kconfig"
 

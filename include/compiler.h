@@ -44,6 +44,8 @@
 
 #ifdef __linux__
 # include <endian.h>
+/*__extension_keyword to suppress the warning */
+__extension__
 # include <byteswap.h>
 #elif defined(__MACH__) || defined(__FreeBSD__)
 # include <machine/endian.h>

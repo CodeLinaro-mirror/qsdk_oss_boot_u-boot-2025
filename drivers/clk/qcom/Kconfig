@@ -1,4 +1,4 @@
-if ARCH_SNAPDRAGON || ARCH_IPQ40XX
+if ARCH_SNAPDRAGON || ARCH_IPQ40XX || ARCH_IPQ
 
 config CLK_QCOM
 	bool
@@ -29,6 +29,30 @@ config CLK_QCOM_IPQ4019
 	help
 	  Say Y here to enable support for the Global Clock Controller
 	  on the Snapdragon IPQ4019 SoC. This driver supports the clocks
+	  and resets exposed by the GCC hardware block.
+
+config CLK_QCOM_IPQ5332
+	bool "Qualcomm IPQ5332 GCC"
+	select CLK_QCOM
+	help
+	  Say Y here to enable support for the Global Clock Controller
+	  on the Snapdragon IPQ5332 SoC. This driver supports the clocks
+	  and resets exposed by the GCC hardware block.
+
+config CLK_QCOM_IPQ5424
+	bool "Qualcomm IPQ5424 GCC"
+	select CLK_QCOM
+	help
+	  Say Y here to enable support for the Global Clock Controller
+	  on the Snapdragon IPQ5424 SoC. This driver supports the clocks
+	  and resets exposed by the GCC hardware block.
+
+config CLK_QCOM_IPQ9574
+	bool "Qualcomm IPQ9574 GCC"
+	select CLK_QCOM
+	help
+	  Say Y here to enable support for the Global Clock Controller
+	  on the Snapdragon IPQ9574 SoC. This driver supports the clocks
 	  and resets exposed by the GCC hardware block.
 
 config CLK_QCOM_QCM2290

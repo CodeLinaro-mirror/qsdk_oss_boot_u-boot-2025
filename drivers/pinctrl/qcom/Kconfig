@@ -1,4 +1,4 @@
-if ARCH_SNAPDRAGON || ARCH_IPQ40XX
+if ARCH_SNAPDRAGON || ARCH_IPQ40XX || ARCH_IPQ
 
 config PINCTRL_QCOM
 	depends on PINCTRL_GENERIC
@@ -25,6 +25,27 @@ config PINCTRL_QCOM_IPQ4019
 	select PINCTRL_QCOM
 	help
 	  Say Y here to enable support for pinctrl on the IPQ4019 SoC,
+	  as well as the associated GPIO driver.
+
+config PINCTRL_QCOM_IPQ5332
+	bool "Qualcomm IPQ5332 GCC"
+	select PINCTRL_QCOM
+	help
+	  Say Y here to enable support for pinctrl on the IPQ5332 SoC,
+	  as well as the associated GPIO driver.
+
+config PINCTRL_QCOM_IPQ5424
+	bool "Qualcomm IPQ5424 GCC"
+	select PINCTRL_QCOM
+	help
+	  Say Y here to enable support for pinctrl on the IPQ5424 SoC,
+	  as well as the associated GPIO driver.
+
+config PINCTRL_QCOM_IPQ9574
+	bool "Qualcomm IPQ9574 GCC"
+	select PINCTRL_QCOM
+	help
+	  Say Y here to enable support for pinctrl on the IPQ9574 SoC,
 	  as well as the associated GPIO driver.
 
 config PINCTRL_QCOM_QCM2290
