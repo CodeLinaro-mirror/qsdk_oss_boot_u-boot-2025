@@ -5,6 +5,7 @@
  * mode support
  *
  * Copyright (c) 2020 Sartura Ltd.
+ * Copyright (c) 2025, Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Author: Robert Marko <robert.marko@sartura.hr>
  * Author: Luka Kovacic <luka.kovacic@sartura.hr>
@@ -179,13 +180,34 @@ struct qup_spi_priv {
 	struct gpio_desc cs_gpios[SPI_NUM_CHIPSELECTS];
 	bool cs_high;
 	u32 core_state;
+	bool force_cs;
 };
+
+static void qup_write_force_cs(struct udevice *dev, int assert)
+{
+	struct qup_spi_priv *priv = dev_get_priv(dev);
+
+	if (assert)
+		clrsetbits_le32(priv->base + SPI_IO_CONTROL,
+				FORCE_CS_MSK, FORCE_CS_EN);
+	else
+		clrsetbits_le32(priv->base + SPI_IO_CONTROL,
+				FORCE_CS_MSK, FORCE_CS_DIS);
+
+        return;
+
+}
 
 static int qup_spi_set_cs(struct udevice *dev, unsigned int cs, bool enable)
 {
 	struct qup_spi_priv *priv = dev_get_priv(dev);
 
 	debug("%s: cs=%d enable=%d\n", __func__, cs, enable);
+
+	if (priv->force_cs) {
+		qup_write_force_cs(dev, !enable);
+		return 0;
+	}
 
 	if (cs >= SPI_NUM_CHIPSELECTS)
 		return -ENODEV;
@@ -615,6 +637,7 @@ static int qup_spi_hw_init(struct udevice *dev)
 {
 	struct udevice *bus = dev_get_parent(dev);
 	struct qup_spi_priv *priv = dev_get_priv(bus);
+	struct dm_spi_slave_plat *slave_plat = dev_get_parent_plat(dev);
 	int ret;
 
 	/* QUPn module configuration */
@@ -669,10 +692,11 @@ static int qup_spi_hw_init(struct udevice *dev)
 				INPUT_BLOCK_MODE |
 				OUTPUT_BLOCK_MODE));
 
+	qup_spi_set_mode(bus, slave_plat->mode);
+
 	/* Disable Error mask */
 	writel(0, priv->base + SPI_ERROR_FLAGS_EN);
 	writel(0, priv->base + QUP_ERROR_FLAGS_EN);
-	writel(0, priv->base + BLSP0_SPI_DEASSERT_WAIT_REG);
 
 	return ret;
 }
@@ -762,6 +786,7 @@ static int qup_spi_probe(struct udevice *dev)
 		return ret;
 
 	priv->num_cs = dev_read_u32_default(dev, "num-cs", 1);
+	priv->force_cs = dev_read_bool(dev, "force-cs");
 
 	ret = gpio_request_list_by_name(dev, "cs-gpios", priv->cs_gpios,
 					priv->num_cs, GPIOD_IS_OUT | GPIOD_IS_OUT_ACTIVE);
