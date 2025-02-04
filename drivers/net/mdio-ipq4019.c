@@ -3,6 +3,7 @@
  * Qualcomm IPQ4019 MDIO driver
  *
  * Copyright (c) 2020 Sartura Ltd.
+ * Copyright (c) 2025, Qualcomm Innovation Center, Inc. All rights resereted.
  *
  * Author: Luka Kovacic <luka.kovacic@sartura.hr>
  * Author: Robert Marko <robert.marko@sartura.hr>
@@ -11,10 +12,14 @@
  */
 
 #include <asm/io.h>
+#include <common.h>
 #include <dm.h>
+#include <dm/device_compat.h>
+#include <clk.h>
 #include <errno.h>
 #include <linux/bitops.h>
 #include <linux/iopoll.h>
+#include <linux/bitfield.h>
 #include <miiphy.h>
 #include <phy.h>
 
@@ -27,15 +32,21 @@
 #define MDIO_CMD_ACCESS_START       BIT(8)
 #define MDIO_CMD_ACCESS_CODE_READ   0
 #define MDIO_CMD_ACCESS_CODE_WRITE  1
+#define MDIO_CMD_ACCESS_CODE_C45_ADDR	0
+#define MDIO_CMD_ACCESS_CODE_C45_WRITE	1
+#define MDIO_CMD_ACCESS_CODE_C45_READ	2
 
 /* 0 = Clause 22, 1 = Clause 45 */
 #define MDIO_MODE_BIT               BIT(8)
+/* MDC frequency is SYS_CLK/(CLK_DIV + 1) */
+#define MDIO_CLK_DIV_MASK		GENMASK(7, 0)
 
 #define IPQ4019_MDIO_TIMEOUT    10000
 #define IPQ4019_MDIO_SLEEP      10
 
 struct ipq4019_mdio_priv {
 	phys_addr_t mdio_base;
+	int clk_div;
 };
 
 static int ipq4019_mdio_wait_busy(struct ipq4019_mdio_priv *priv)
@@ -50,15 +61,37 @@ static int ipq4019_mdio_wait_busy(struct ipq4019_mdio_priv *priv)
 int ipq4019_mdio_read(struct udevice *dev, int addr, int devad, int reg)
 {
 	struct ipq4019_mdio_priv *priv = dev_get_priv(dev);
-	unsigned int cmd;
+	unsigned int ctrl_0, cmd;
 
 	if (ipq4019_mdio_wait_busy(priv))
 		return -ETIMEDOUT;
 
-	/* Issue the phy address and reg */
-	writel((addr << 8) | reg, priv->mdio_base + MDIO_ADDR_REG);
+	ctrl_0 = readl(priv->mdio_base + MDIO_MODE_REG);
+	ctrl_0 &= ~MDIO_CLK_DIV_MASK;
+	ctrl_0 |= FIELD_PREP(MDIO_CLK_DIV_MASK, priv->clk_div);
 
-	cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_READ;
+	if (devad != MDIO_DEVAD_NONE) {
+		/* Enter Clause 45 mode */
+		ctrl_0 |= MDIO_MODE_BIT;
+		writel(ctrl_0, priv->mdio_base + MDIO_MODE_REG);
+
+		/* Issue the phy address and reg */
+		writel((addr << 8) | devad,
+				priv->mdio_base + MDIO_ADDR_REG);
+
+		writel(reg, priv->mdio_base + MDIO_DATA_WRITE_REG);
+
+		cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_C45_ADDR;
+	} else {
+		/* Enter Clause 22 mode */
+		ctrl_0 &= ~MDIO_MODE_BIT;
+		writel(ctrl_0, priv->mdio_base + MDIO_MODE_REG);
+
+		/* Issue the phy address and reg */
+		writel((addr << 8) | reg, priv->mdio_base + MDIO_ADDR_REG);
+
+		cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_READ;
+	}
 
 	/* Issue read command */
 	writel(cmd, priv->mdio_base + MDIO_CMD_REG);
@@ -66,6 +99,14 @@ int ipq4019_mdio_read(struct udevice *dev, int addr, int devad, int reg)
 	/* Wait read complete */
 	if (ipq4019_mdio_wait_busy(priv))
 		return -ETIMEDOUT;
+
+	if (devad != MDIO_DEVAD_NONE) {
+		cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_C45_READ;
+		writel(cmd, priv->mdio_base + MDIO_CMD_REG);
+
+		if (ipq4019_mdio_wait_busy(priv))
+			return -ETIMEDOUT;
+	}
 
 	/* Read and return data */
 	return readl(priv->mdio_base + MDIO_DATA_READ_REG);
@@ -75,24 +116,53 @@ int ipq4019_mdio_write(struct udevice *dev, int addr, int devad,
 					  int reg, u16 val)
 {
 	struct ipq4019_mdio_priv *priv = dev_get_priv(dev);
-	unsigned int cmd;
+	unsigned int ctrl_0, cmd;
 
 	if (ipq4019_mdio_wait_busy(priv))
 		return -ETIMEDOUT;
 
-	/* Issue the phy addreass and reg */
-	writel((addr << 8) | reg, priv->mdio_base + MDIO_ADDR_REG);
+	ctrl_0 = readl(priv->mdio_base + MDIO_MODE_REG);
+	ctrl_0 &= ~MDIO_CLK_DIV_MASK;
+	ctrl_0 |= FIELD_PREP(MDIO_CLK_DIV_MASK, priv->clk_div);
+
+	if (devad != MDIO_DEVAD_NONE) {
+		/* Enter Clause 45 mode */
+		ctrl_0 |= MDIO_MODE_BIT;
+		writel(ctrl_0, priv->mdio_base + MDIO_MODE_REG);
+
+		/* Issue the phy address and reg */
+		writel((addr << 8) | devad,
+				priv->mdio_base + MDIO_ADDR_REG);
+
+		writel(reg, priv->mdio_base + MDIO_DATA_WRITE_REG);
+
+		/* issue read command */
+		cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_C45_ADDR;
+
+		writel(cmd, priv->mdio_base + MDIO_CMD_REG);
+
+		if (ipq4019_mdio_wait_busy(priv))
+			return -ETIMEDOUT;
+
+		cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_C45_WRITE;
+	} else {
+		/* Enter Clause 22 mode */
+		ctrl_0 &= ~MDIO_MODE_BIT;
+		writel(ctrl_0, priv->mdio_base + MDIO_MODE_REG);
+
+		/* Issue the phy addreass and reg */
+		writel((addr << 8) | reg, priv->mdio_base + MDIO_ADDR_REG);
+
+		cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_WRITE;
+	}
 
 	/* Issue write data */
 	writel(val, priv->mdio_base + MDIO_DATA_WRITE_REG);
-
-	cmd = MDIO_CMD_ACCESS_START | MDIO_CMD_ACCESS_CODE_WRITE;
 
 	/* Issue write command */
 	writel(cmd, priv->mdio_base + MDIO_CMD_REG);
 
 	/* Wait for write complete */
-
 	if (ipq4019_mdio_wait_busy(priv))
 		return -ETIMEDOUT;
 
@@ -115,18 +185,40 @@ static int ipq4019_mdio_bind(struct udevice *dev)
 static int ipq4019_mdio_probe(struct udevice *dev)
 {
 	struct ipq4019_mdio_priv *priv = dev_get_priv(dev);
-	unsigned int data;
+	struct clk clk;
+	int clk_div, ret = 0;
 
 	priv->mdio_base = dev_read_addr(dev);
 	if (priv->mdio_base == FDT_ADDR_T_NONE)
 		return -EINVAL;
 
-	/* Enter Clause 22 mode */
-	data = readl(priv->mdio_base + MDIO_MODE_REG);
-	data &= ~MDIO_MODE_BIT;
-	writel(data, priv->mdio_base + MDIO_MODE_REG);
+	clk_div = dev_read_u8_default(dev, "clk_div", 0);
+	if (clk_div != 0) {
+		if (((clk_div != 0xFF) && ((clk_div + 1) & clk_div)) != 0) {
+		/*
+		 * supported div factor 8, 16, 32, 64, 128 & 256
+		 * div factor = div + 1
+		 * default frequency is 6.25MHz
+		 */
+			dev_dbg(dev, "clk div factor not in range, "
+					"use default (0x0F)\n");
+			clk_div = 0x0F;
+		}
+	}
 
-	return 0;
+	priv->clk_div = clk_div;
+
+	ret = clk_get_by_index(dev, 0, &clk);
+	if (ret && ret != -ENOENT) {
+		dev_dbg(dev, "Failed to get clock (ret=%d)\n", ret);
+		return ret;
+	}
+
+	ret = clk_enable(&clk);
+	if (ret < 0)
+		dev_err(dev, "Failed to enable clock (ret=%d)\n", ret);
+
+	return ret;
 }
 
 static const struct udevice_id ipq4019_mdio_ids[] = {
