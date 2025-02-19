@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2006
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
+# Copyright (c) 2025, Qualcomm Innovation Center, Inc. All rights reserved.
 
 obj-$(CONFIG_DMA) += dma-uclass.o
 
@@ -13,5 +14,6 @@ obj-$(CONFIG_TI_KSNAV) += keystone_nav.o keystone_nav_cfg.o
 obj-$(CONFIG_TI_EDMA3) += ti-edma3.o
 obj-$(CONFIG_DMA_LPC32XX) += lpc32xx_dma.o
 obj-$(CONFIG_XILINX_DPDMA) += xilinx_dpdma.o
+obj-$(CONFIG_BAM_DMA) += bam_dma.o
 
 obj-y += ti/
