@@ -5,6 +5,7 @@
  *
  * Copyright (C) 2005, Intec Automation Inc.
  * Copyright (C) 2014, Freescale Semiconductor, Inc.
+ * Copyright (c) 2025, Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Synced from Linux v4.19
  */
@@ -187,6 +188,12 @@ struct sfdp_header {
 
 /* Status, Control and Configuration Register Map(SCCR) */
 #define SCCR_DWORD22_OCTAL_DTR_EN_VOLATILE      BIT(31)
+
+#ifdef CONFIG_MSM_GENI_SPI
+#define SPI_NOR_READ_MAX_BYTES 0xFFFFFF
+#else
+#define SPI_NOR_READ_MAX_BYTES UINT_MAX
+#endif
 
 struct sfdp_bfpt {
 	u32	dwords[BFPT_DWORD_MAX];
@@ -398,7 +405,9 @@ static ssize_t spi_nor_read_data(struct spi_nor *nor, loff_t from, size_t len,
 		op.dummy.nbytes *= 2;
 
 	while (remaining) {
-		op.data.nbytes = remaining < UINT_MAX ? remaining : UINT_MAX;
+
+		op.data.nbytes = remaining < SPI_NOR_READ_MAX_BYTES ?
+					remaining : SPI_NOR_READ_MAX_BYTES;
 
 		if (CONFIG_IS_ENABLED(SPI_DIRMAP) && nor->dirmap.rdesc) {
 			/*

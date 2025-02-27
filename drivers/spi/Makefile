@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2000-2007
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
+# Copyright (c) 2025, Qualcomm Innovation Center, Inc. All rights reserved.
 
 # There are many options which enable SPI, so make this library available
 ifdef CONFIG_$(PHASE_)DM_SPI
@@ -84,3 +85,4 @@ obj-$(CONFIG_XILINX_SPI) += xilinx_spi.o
 obj-$(CONFIG_ZYNQ_SPI) += zynq_spi.o
 obj-$(CONFIG_ZYNQ_QSPI) += zynq_qspi.o
 obj-$(CONFIG_ZYNQMP_GQSPI) += zynqmp_gqspi.o
+obj-$(CONFIG_MSM_GENI_SPI) += spi-geni-qcom.o
