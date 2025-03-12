@@ -3,11 +3,13 @@
  * Qualcomm SDHCI driver - SD/eMMC controller
  *
  * (C) Copyright 2015 Mateusz Kulikowski <mateusz.kulikowski@gmail.com>
+ * Copyright (c) 2025, Qualcomm Innovation Center,Inc.All rights reserved.
  *
  * Based on Linux driver
  */
 
 #include <clk.h>
+#include <reset.h>
 #include <dm.h>
 #include <malloc.h>
 #include <sdhci.h>
@@ -45,6 +47,7 @@ struct msm_sdhc {
 	void *base;
 	struct clk_bulk clks;
 	struct udevice *vqmmc;
+	struct reset_ctl bcr_rst;
 };
 
 struct msm_sdhc_variant_info {
@@ -66,6 +69,18 @@ static int msm_sdc_clk_init(struct udevice *dev)
 	const char *clk_name;
 
 	var_info = (void *)dev_get_driver_data(dev);
+
+	ret = reset_get_by_name(dev, "bcr_rst", &prv->bcr_rst);
+	if (ret && ret != -ENOENT) {
+		log_warning("Couldn't get mmc bcr_rst: %d\n", ret);
+		return ret;
+	} else if (!ret) {
+		reset_assert(&prv->bcr_rst);
+		mdelay(10);
+
+		reset_deassert(&prv->bcr_rst);
+		mdelay(10);
+	}
 
 	ret = ofnode_read_u32(node, "clock-frequency", (uint *)(&clk_rate));
 	if (ret)

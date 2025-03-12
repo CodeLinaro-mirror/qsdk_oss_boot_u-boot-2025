@@ -8,6 +8,7 @@
  *     Author: Robert Marko <robert.marko@sartura.hr>
  * (C) Copyright 2022 Linaro Ltd. (reset driver)
  *     Author: Sumit Garg <sumit.garg@linaro.org>
+ * Copyright (c) 2025, Qualcomm Innovation Center,Inc.All rights reserved.
  *
  * Based on Little Kernel driver, simplified
  */
@@ -88,8 +89,8 @@ void clk_bcr_update(phys_addr_t apps_cmd_rcgr)
 			break;
 		udelay(1);
 	}
-	WARN(count == 50000, "WARNING: RCG @ %#llx [%#010x] stuck at off\n",
-	     apps_cmd_rcgr, readl(apps_cmd_rcgr));
+	WARN(count == 50000, "WARNING: RCG @ %pa [%#010x] stuck at off\n",
+	     (void *)&apps_cmd_rcgr, readl(apps_cmd_rcgr));
 }
 
 #define CFG_SRC_DIV_MASK	0b11111

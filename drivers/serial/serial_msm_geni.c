@@ -3,6 +3,7 @@
  * Qualcomm GENI serial engine UART driver
  *
  * (C) Copyright 2021 Dzmitry Sankouski <dsankouski@gmail.com>
+ * Copyright (c) 2025, Qualcomm Innovation Center,Inc.All rights reserved.
  *
  * Based on Linux driver.
  */
@@ -313,7 +314,7 @@ static bool qcom_geni_serial_poll_bit(const struct udevice *dev, int offset,
 	return false;
 }
 
-static void qcom_geni_serial_setup_tx(u64 base, u32 xmit_size)
+static void qcom_geni_serial_setup_tx(uintptr_t base, u32 xmit_size)
 {
 	u32 m_cmd;
 
@@ -339,7 +340,7 @@ static inline void qcom_geni_serial_poll_tx_done(const struct udevice *dev)
 	writel(irq_clear, priv->base + SE_GENI_M_IRQ_CLEAR);
 }
 
-static u32 qcom_geni_serial_tx_empty(u64 base)
+static u32 qcom_geni_serial_tx_empty(uintptr_t base)
 {
 	return !readl(base + SE_GENI_TX_FIFO_STATUS);
 }
@@ -353,7 +354,7 @@ static u32 qcom_geni_serial_tx_empty(u64 base)
  * This function is used to configure the secondary sequencer with the
  * command and its associated parameters.
  */
-static inline void geni_se_setup_s_cmd(u64 base, u32 cmd, u32 params)
+static inline void geni_se_setup_s_cmd(uintptr_t base, u32 cmd, u32 params)
 {
 	u32 s_cmd;
 
@@ -364,7 +365,7 @@ static inline void geni_se_setup_s_cmd(u64 base, u32 cmd, u32 params)
 	writel(s_cmd, base + SE_GENI_S_CMD0);
 }
 
-static void qcom_geni_serial_start_tx(u64 base)
+static void qcom_geni_serial_start_tx(uintptr_t base)
 {
 	u32 irq_en;
 	u32 status;

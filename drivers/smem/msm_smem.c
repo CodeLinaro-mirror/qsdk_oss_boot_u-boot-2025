@@ -3,6 +3,7 @@
  * Copyright (c) 2015, Sony Mobile Communications AB.
  * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
  * Copyright (c) 2018, Ramon Fried <ramon.fried@gmail.com>
+ * Copyright (c) 2025, Qualcomm Innovation Center, Inc. All rights reserved.
  */
 
 #include <errno.h>
@@ -934,4 +935,5 @@ U_BOOT_DRIVER(qcom_smem) = {
 	.ops = &msm_smem_ops,
 	.probe = qcom_smem_probe,
 	.remove = qcom_smem_remove,
+	.flags = DM_FLAG_PRE_RELOC,
 };
