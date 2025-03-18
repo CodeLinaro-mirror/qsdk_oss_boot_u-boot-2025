@@ -382,3 +382,28 @@ config PHY_RESET_DELAY
 	  Some PHYs need extra delay after reset before any MII register access
 	  is possible.  For such PHY, set this option to the usec delay
 	  required.
+
+config PHY_QCA_8X8X
+	bool "QCA Ethernet QCA808x(PHY)/QCA8386(Switch) support"
+	---help---
+	  Adds support for the QCA Ethernet QCA808x(PHY)/QCA8386(Switch).
+
+config PHY_QCA_8075
+	bool "QCA Ethernet QCA8075 support"
+	---help---
+	  Adds support for the QCA Ethernet QCA8075.
+
+config PHY_QCA_8081
+	bool "QCA Ethernet QCA8081 support"
+	---help---
+	  Adds support for the QCA Ethernet QCA8081.
+
+config PHY_QCA_81XX
+	bool "QCA Ethernet QCA81XX support"
+	---help---
+	  Adds support for the QCA Ethernet QCA81XX.
+
+config PHY_QCA_8033
+	bool "QCA Ethernet QCA8033 support"
+	---help---
+	  Adds support for the QCA Ethernet QCA8033.

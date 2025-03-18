@@ -1035,6 +1035,20 @@ config MDIO_IPQ4019
 	  This driver supports the MDIO interface found in Qualcomm
 	  IPQ40xx series Soc-s.
 
+config MDIO_IPQ_BITBANGMII
+	bool "Qualcomm IPQ Bit-Bang MDIO interface support"
+	depends on DM_MDIO && BITBANGMII && BITBANGMII_MULTI
+	help
+	  This driver supports the MDIO interface found in Qualcomm
+	  IPQ series Soc-s.
+
+config MDIO_QCOM_I2C
+	bool "Qualcomm MDIO - I2C interface support"
+	depends on DM_MDIO
+	help
+	  This driver supports the MDIO - I2C interface software driver for
+	  Qualcomm IPQ series Soc-s.
+
 config MVMDIO
 	bool "Marvell MDIO interface support"
 	depends on DM_MDIO
@@ -1079,5 +1093,13 @@ config MDIO_MUX_MESON_GXL
 	help
 	  This driver is used for the MDIO mux found on the Amlogic GXL & compatible
 	  SoCs.
+
+config QCOM_NSS_SWITCH
+	bool "Qualcomm Ethernet support"
+	help
+	  This driver supports the NSS interface found in Qualcomm
+	  IPQ series SoC-s.
+
+source "drivers/net/qcom/Kconfig"
 
 endif # NETDEVICES

@@ -40,6 +40,9 @@
 #define CFG_GDSCR_OFFSET		0x4
 #define GDSC_STATUS_POLL_TIMEOUT_US	1500
 
+__weak ulong msm_get_rate(struct clk *clk) {return 0; }
+__weak int msm_set_parent(struct clk *clk, struct clk *parent) {return 0; }
+
 /* Enable clock controlled by CBC soft macro */
 void clk_enable_cbc(phys_addr_t cbcr)
 {
@@ -93,6 +96,7 @@ void clk_bcr_update(phys_addr_t apps_cmd_rcgr)
 	     (void *)&apps_cmd_rcgr, readl(apps_cmd_rcgr));
 }
 
+#define CFG_MASK		0x3FFF
 #define CFG_SRC_DIV_MASK	0b11111
 #define CFG_SRC_SEL_SHIFT	8
 #define CFG_SRC_SEL_MASK	(0x7 << CFG_SRC_SEL_SHIFT)
@@ -138,6 +142,33 @@ void clk_rcg_set_rate_mnd(phys_addr_t base, uint32_t cmd_rcgr,
 		cfg |= CFG_MODE_DUAL_EDGE;
 
 	writel(cfg, base + cmd_rcgr + RCG_CFG_REG); /* Write new clock configuration */
+
+	/* Inform h/w to start using the new config. */
+	clk_bcr_update(base + cmd_rcgr);
+}
+
+/* root set rate for clocks without the MND divider */
+void clk_rcg_set_rate_v2(phys_addr_t base, uint32_t cmd_rcgr, uint32_t div_cdivr,
+			 int div, int cdiv, int source)
+{
+	u32 cfg;
+
+	/* setup src select and divider */
+	cfg  = readl(base + cmd_rcgr + RCG_CFG_REG);
+	cfg &= ~CFG_MASK;
+	cfg |= source & CFG_CLK_SRC_MASK; /* Select clock source */
+
+	/*
+	 * Set the divider
+	 */
+	if (div)
+		cfg |= div & CFG_SRC_DIV_MASK;
+
+	writel(cfg, base + cmd_rcgr + RCG_CFG_REG); /* Write new clock configuration */
+
+	/* Write the common divider clock configuration */
+	if (div_cdivr)
+		writel(cdiv, base + div_cdivr);
 
 	/* Inform h/w to start using the new config. */
 	clk_bcr_update(base + cmd_rcgr);
@@ -351,9 +382,21 @@ static void __maybe_unused msm_dump_clks(struct udevice *dev)
 	dump_rcgs(dev);
 }
 
+static ulong msm_clk_get_rate(struct clk *clk)
+{
+	return msm_get_rate(clk);
+}
+
+static int msm_clk_set_parent(struct clk *clk, struct clk *parent)
+{
+	return msm_set_parent(clk, parent);
+}
+
 static struct clk_ops msm_clk_ops = {
 	.set_rate = msm_clk_set_rate,
 	.enable = msm_clk_enable,
+	.get_rate = msm_clk_get_rate,
+	.set_parent = msm_clk_set_parent,
 #if IS_ENABLED(CONFIG_CMD_CLK)
 	.dump = msm_dump_clks,
 #endif
