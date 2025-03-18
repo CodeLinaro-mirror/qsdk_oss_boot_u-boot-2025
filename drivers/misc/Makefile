@@ -2,6 +2,7 @@
 #
 # (C) Copyright 2000-2007
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
+# Copyright (c) 2025, Qualcomm Innovation Center, Inc. All rights reserved.
 
 obj-$(CONFIG_$(PHASE_)MISC) += misc-uclass.o
 obj-$(CONFIG_$(PHASE_)NVMEM) += nvmem.o
@@ -92,3 +93,5 @@ obj-$(CONFIG_ESM_K3) += k3_esm.o
 obj-$(CONFIG_ESM_PMIC) += esm_pmic.o
 obj-$(CONFIG_SL28CPLD) += sl28cpld.o
 obj-$(CONFIG_SPL_SOCFPGA_DT_REG) += socfpga_dtreg.o
+obj-$(CONFIG_QCOM_GENI_SE) += qcom-geni-se.o
+obj-$(CONFIG_NOR_BLK) += qti_nor_blk.o
