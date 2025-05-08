@@ -449,10 +449,10 @@ static void lmb_print_region_flags(u32 flags)
 	}
 
 	do {
-		int bitpos = pflags ? fls(pflags) - 1 : 0;
+		int bitpos = pflags ? fls(pflags) : 0;
 
 		printf("%s", flag_str[bitpos]);
-		pflags &= ~(1u << bitpos);
+		pflags ^= BIT(bitpos - 1);
 		puts(pflags ? ", " : "\n");
 	} while (pflags);
 }
