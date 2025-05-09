@@ -12,7 +12,6 @@
  */
 
 #include <asm/io.h>
-#include <common.h>
 #include <dm.h>
 #include <dm/device_compat.h>
 #include <clk.h>
