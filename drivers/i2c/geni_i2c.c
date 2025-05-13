@@ -469,6 +469,8 @@ static int geni_i2c_probe(struct udevice *dev)
 	ofnode parent_node = ofnode_get_parent(dev_ofnode(dev));
 	struct geni_i2c_priv *geni = dev_get_priv(dev);
 	u32 proto, tx_depth, fifo_disable;
+	struct ofnode_phandle_args args;
+	struct udevice *config = NULL;
 	int ret;
 
 	geni->is_master_hub = dev_get_driver_data(dev) & GENI_I2C_IS_MASTER_HUB;
@@ -496,6 +498,17 @@ static int geni_i2c_probe(struct udevice *dev)
 	}
 
 	geni_i2c_enable_clocks(dev, geni);
+
+	ret = dev_read_phandle_with_args(dev, "qup-se-fw-load", NULL, 0, 0,
+					 &args);
+	if (!ret) {
+		ret = uclass_get_device_by_ofnode(UCLASS_NOP, args.node,
+						  &config);
+		if (ret)
+			dev_err(dev,
+				"Failed to write SE(I2C) Firmware: %d\n",
+				ret);
+	}
 
 	proto = readl(geni->base + GENI_FW_REVISION_RO);
 	proto &= FW_REV_PROTOCOL_MSK;
