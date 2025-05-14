@@ -12,6 +12,7 @@
 #include <clk.h>
 #include <dm.h>
 #include <errno.h>
+#include <dm/device_compat.h>
 #include <linux/delay.h>
 #include <linux/time.h>
 #include <misc.h>
@@ -561,6 +562,8 @@ static inline void geni_serial_init(struct udevice *dev)
 static int msm_serial_probe(struct udevice *dev)
 {
 	struct msm_serial_data *priv = dev_get_priv(dev);
+	struct ofnode_phandle_args args;
+	struct udevice *config = NULL;
 	int ret;
 
 	ret = geni_set_oversampling(dev);
@@ -570,6 +573,17 @@ static int msm_serial_probe(struct udevice *dev)
 	/* No need to reinitialize the UART after relocation */
 	if (gd->flags & GD_FLG_RELOC)
 		return 0;
+
+	ret = dev_read_phandle_with_args(dev, "qup-se-fw-load", NULL, 0, 0,
+					 &args);
+	if (!ret) {
+		ret = uclass_get_device_by_ofnode(UCLASS_NOP, args.node,
+						  &config);
+		if (ret)
+			dev_err(dev,
+				"Failed to write SE(UART) Firmware: %d\n",
+				ret);
+	}
 
 	geni_serial_init(dev);
 	msm_geni_serial_setup_rx(dev);
