@@ -79,11 +79,13 @@ void clk_enable_vote_clk(phys_addr_t base, const struct vote_clk *vclk)
 }
 
 #define APPS_CMD_RCGR_UPDATE BIT(0)
+#define APPS_CMD_RCGR_ROOT_EN BIT(1)
 
 /* Update clock command via CMD_RCGR */
 void clk_bcr_update(phys_addr_t apps_cmd_rcgr)
 {
 	u32 count;
+
 	setbits_le32(apps_cmd_rcgr, APPS_CMD_RCGR_UPDATE);
 
 	/* Wait for frequency to be updated. */
@@ -94,6 +96,8 @@ void clk_bcr_update(phys_addr_t apps_cmd_rcgr)
 	}
 	WARN(count == 50000, "WARNING: RCG @ %pa [%#010x] stuck at off\n",
 	     (void *)&apps_cmd_rcgr, readl(apps_cmd_rcgr));
+
+	setbits_le32(apps_cmd_rcgr, APPS_CMD_RCGR_ROOT_EN);
 }
 
 #define CFG_MASK		0x3FFF
