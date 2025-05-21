@@ -259,7 +259,13 @@ enum geni_se_protocol_type {
 #define GENI_SE_VERSION_MINOR(ver) ((ver & HW_VER_MINOR_MASK) >> HW_VER_MINOR_SHFT)
 #define GENI_SE_VERSION_STEP(ver) (ver & HW_VER_STEP_MASK)
 
+/* QUP SE VERSION value for major number 1 and minor number 0 */
+#define QUP_SE_VERSION_1_0		0x10000000
+
 /* QUP SE VERSION value for major number 2 and minor number 5 */
-#define QUP_SE_VERSION_2_5                  0x20050000
+#define QUP_SE_VERSION_2_5		0x20050000
+
+/* QUP SE VERSION value for major number 3 and minor number 10 */
+#define QUP_SE_VERSION_3_10		0x300A0000
 
 #endif
