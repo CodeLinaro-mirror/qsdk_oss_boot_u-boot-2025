@@ -450,4 +450,12 @@ config WDT_FTWDT010
 	help
 	  Faraday Technology ftwdt010 watchdog is an architecture independent
 	  watchdog. It is usually used in SoC chip design.
+
+config WDT_QCOM
+	bool "Qualcomm non-secure watchdog driver support"
+	depends on WDT
+	help
+	  Enable support for the watchdog timer on Qualcomm SoCs.
+	  The watchdog will perform a full SoC reset resulting in a
+	  reboot of the entire system.
 endmenu
