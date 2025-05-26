@@ -368,6 +368,9 @@ int env_get_default_into(const char *name, char *buf, unsigned int len)
 	return env_get_from_linear(default_environment, name, buf, len);
 }
 
+
+__weak void setup_board_default_env(void) {}
+
 void env_set_default(const char *s, int flags)
 {
 	if (s) {
@@ -392,6 +395,11 @@ void env_set_default(const char *s, int flags)
 
 	gd->flags |= GD_FLG_ENV_READY;
 	gd->flags |= GD_FLG_ENV_DEFAULT;
+
+/*
+ * setup board default env
+ */
+	setup_board_default_env();
 }
 
 /* [re]set individual variables to their value in the default environment */
