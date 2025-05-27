@@ -61,6 +61,11 @@ static int menukey;
 #if defined(CONFIG_CMD_NET) && defined(CONFIG_ETH_SKIP_INIT_R)
 extern int initr_net(void);
 #endif
+
+#if defined(CONFIG_IPQ_STOP_WDT)
+extern void ipq_wdt_start(bool start);
+#endif
+
 /**
  * passwd_abort_crypt() - check for a crypt-style hashed key sequence to abort booting
  *
@@ -415,6 +420,10 @@ static int abortboot_single_key(int bootdelay)
 
 #if defined(CONFIG_CMD_NET) && defined(CONFIG_ETH_SKIP_INIT_R)
 	initr_net();
+#endif
+
+#if defined(CONFIG_IPQ_STOP_WDT)
+	ipq_wdt_start(false);
 #endif
 
 	return abort;
