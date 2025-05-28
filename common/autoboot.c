@@ -418,14 +418,6 @@ static int abortboot_single_key(int bootdelay)
 
 	putc('\n');
 
-#if defined(CONFIG_CMD_NET) && defined(CONFIG_ETH_SKIP_INIT_R)
-	initr_net();
-#endif
-
-#if defined(CONFIG_IPQ_STOP_WDT)
-	ipq_wdt_start(false);
-#endif
-
 	return abort;
 }
 
@@ -530,4 +522,12 @@ void autoboot_command(const char *s)
 		if (s)
 			run_command_list(s, -1, 0);
 	}
+
+#if defined(CONFIG_CMD_NET) && defined(CONFIG_ETH_SKIP_INIT_R)
+	initr_net();
+#endif
+
+#if defined(CONFIG_IPQ_STOP_WDT)
+	ipq_wdt_start(false);
+#endif
 }
