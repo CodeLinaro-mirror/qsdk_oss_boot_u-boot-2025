@@ -531,9 +531,12 @@ static int xhci_init_ep_contexts_if(struct usb_device *udev,
 						   ep_index);
 
 		/* Allocate the ep rings */
-		virt_dev->eps[ep_index].ring = xhci_ring_alloc(ctrl, 1, true);
-		if (!virt_dev->eps[ep_index].ring)
-			return -ENOMEM;
+		if (!virt_dev->eps[ep_index].ring) {
+			virt_dev->eps[ep_index].ring = xhci_ring_alloc(ctrl,
+					1, true);
+			if (!virt_dev->eps[ep_index].ring)
+				return -ENOMEM;
+		}
 
 		/*NOTE: ep_desc[0] actually represents EP1 and so on */
 		dir = (((endpt_desc->bEndpointAddress) & (0x80)) >> 7);
