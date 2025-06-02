@@ -127,12 +127,6 @@
 #define GCC_SNOC_USB_CLK				126
 #define GCC_SYS_NOC_AT_CLK				127
 #define GCC_SYSTEM_NOC_BFDCD_CLK_SRC			129
-#define NSS_CC_CFG_CLK					130
-#define NSS_CC_PPE_CLK					131
-#define UNIPHY0_NSS_RX_CLK				132
-#define UNIPHY0_NSS_TX_CLK				133
-#define UNIPHY1_NSS_RX_CLK				134
-#define UNIPHY1_NSS_TX_CLK				135
 
 #define GCC_UNIPHY0_AHB_CLK				130
 #define GCC_UNIPHY0_SYS_CLK				131
@@ -166,6 +160,13 @@
 #define GCC_PCIE3X1_0_PIPE_CLK_SRC			170
 #define GCC_PCIE3X1_1_PIPE_CLK_SRC			171
 #define GCC_USB0_PIPE_CLK_SRC				172
+
+#define NSS_CC_CFG_CLK					173
+#define NSS_CC_PPE_CLK					174
+#define UNIPHY0_NSS_RX_CLK				175
+#define UNIPHY0_NSS_TX_CLK				176
+#define UNIPHY1_NSS_RX_CLK				177
+#define UNIPHY1_NSS_TX_CLK				178
 
 #define GCC_ADSS_BCR					0
 #define GCC_ADSS_PWM_CLK_ARES				1
