@@ -8,3 +8,7 @@ obj-$(CONFIG_PHY_QCOM_SNPS_EUSB2) += phy-qcom-snps-eusb2.o
 obj-$(CONFIG_PHY_QCOM_USB_HS_28NM) += phy-qcom-usb-hs-28nm.o
 obj-$(CONFIG_PHY_QCOM_USB_SS) += phy-qcom-usb-ss.o
 obj-$(CONFIG_PHY_QCOM_UNIPHY_PCIE) += phy-qca-pcie-uniphy.o
+obj-$(CONFIG_PHY_QCOM_USB_HS_M31) += phy-qcom-usb-hs-m31.o
+obj-$(CONFIG_PHY_QCOM_UNI_SSPHY) += phy-qcom-uni-ssphy.o
+obj-$(CONFIG_PHY_QCOM_QUSB2) += phy-qcom-qusb2.o
+obj-$(CONFIG_PHY_QCOM_QMP_USB3) += phy-qcom-qmp-usb3.o
