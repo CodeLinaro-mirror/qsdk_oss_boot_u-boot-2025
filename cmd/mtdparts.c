@@ -129,7 +129,9 @@ static const char *mtdparts_default = MTDPARTS_DEFAULT;
 
 /* copies of last seen 'mtdids', 'mtdparts' and 'partition' env variables */
 #define MTDIDS_MAXLEN		128
-#ifndef MTDPARTS_MAXLEN
+#if defined(CONFIG_MTDPARTS_MAXLEN)
+#define MTDPARTS_MAXLEN		CONFIG_MTDPARTS_MAXLEN
+#else
 #define MTDPARTS_MAXLEN		512
 #endif
 #define PARTITION_MAXLEN	16
