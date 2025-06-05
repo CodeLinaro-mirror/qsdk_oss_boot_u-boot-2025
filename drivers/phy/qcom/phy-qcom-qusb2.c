@@ -232,6 +232,46 @@ static const struct qusb2_phy_cfg qusb2_v2_phy_cfg = {
 	.update_tune1_with_efuse = true,
 };
 
+static const unsigned int ipq9574_regs_layout[] = {
+	[QUSB2PHY_PLL_STATUS]              = 0x38,
+	[QUSB2PHY_PORT_TUNE1]              = 0x80,
+	[QUSB2PHY_PORT_TUNE2]              = 0x84,
+	[QUSB2PHY_PORT_TUNE3]              = 0x88,
+	[QUSB2PHY_PORT_TUNE4]              = 0x8C,
+	[QUSB2PHY_PORT_TUNE5]              = 0x90,
+	[QUSB2PHY_PORT_TEST1]              = 0x98,
+	[QUSB2PHY_PORT_TEST2]              = 0x9C,
+	[QUSB2PHY_PORT_POWERDOWN]          = 0xB4,
+	[QUSB2PHY_INTR_CTRL]               = 0xBC,
+};
+
+static const struct qusb2_phy_init_tbl ipq9574_init_tbl[] = {
+	QUSB2_PHY_INIT_CFG(QUSB2PHY_PLL, 0x14),
+	QUSB2_PHY_INIT_CFG_L(QUSB2PHY_PORT_TUNE1, 0xF8),
+	QUSB2_PHY_INIT_CFG_L(QUSB2PHY_PORT_TUNE2, 0xB3),
+	QUSB2_PHY_INIT_CFG_L(QUSB2PHY_PORT_TUNE3, 0x83),
+	QUSB2_PHY_INIT_CFG_L(QUSB2PHY_PORT_TUNE4, 0xC0),
+	QUSB2_PHY_INIT_CFG(QUSB2PHY_PLL_TUNE, 0x30),
+	QUSB2_PHY_INIT_CFG(QUSB2PHY_PLL_USER_CTL1, 0x79),
+	QUSB2_PHY_INIT_CFG(QUSB2PHY_PLL_USER_CTL2, 0x21),
+	QUSB2_PHY_INIT_CFG_L(QUSB2PHY_PORT_TUNE5, 0x00),
+	QUSB2_PHY_INIT_CFG(QUSB2PHY_PLL_PWR_CTRL, 0x00),
+	QUSB2_PHY_INIT_CFG_L(QUSB2PHY_PORT_TEST2, 0x14),
+	QUSB2_PHY_INIT_CFG(QUSB2PHY_PLL_TEST, 0x80),
+	QUSB2_PHY_INIT_CFG(QUSB2PHY_PLL_AUTOPGM_CTL1, 0x9F),
+};
+
+static const struct qusb2_phy_cfg ipq9574_phy_cfg = {
+	.tbl            = ipq9574_init_tbl,
+	.tbl_num        = ARRAY_SIZE(ipq9574_init_tbl),
+	.regs           = ipq9574_regs_layout,
+
+	.disable_ctrl   = POWER_DOWN,
+	.mask_core_ready = PLL_LOCKED,
+	/* autoresume not used */
+	.autoresume_en   = BIT(0),
+};
+
 /**
  * struct qusb2_phy - structure holding qusb2 phy attributes
  *
@@ -416,6 +456,9 @@ static const struct udevice_id qusb2phy_ids[] = {
 	{ .compatible = "qcom,sm6115-qusb2-phy",
 	  .data = (ulong)&sm6115_phy_cfg },
 	{ .compatible = "qcom,qusb2-v2-phy", .data = (ulong)&qusb2_v2_phy_cfg },
+	{ .compatible = "qcom,ipq9574-qusb2-phy",
+	  .data = (long unsigned int)&ipq9574_phy_cfg,
+	},
 	{}
 };
 
