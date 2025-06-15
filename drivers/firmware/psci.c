@@ -23,6 +23,7 @@
 #include <linux/printk.h>
 #include <linux/psci.h>
 #include <power-domain-uclass.h>
+#include <asm/psci.h>
 
 #define DRIVER_NAME "psci"
 
@@ -284,7 +285,16 @@ void psci_sys_reset(u32 type)
 
 	reset2_supported = psci_is_system_reset2_supported();
 
-	if (type == SYSRESET_WARM && reset2_supported) {
+	if (type == SYSRESET_VENDOR && reset2_supported) {
+		/*
+		 * reset_type[31] = 1 (architectural)
+		 * reset_type[30:0] = 1 (SYSTEM_VENDOR_RESET)
+		 * cookie = 0 (ignored by the implementation)
+		 */
+		invoke_psci_fn(PSCI_FN_NATIVE(1_1, SYSTEM_RESET2),
+				PSCI_RESET2_TYPE_VENDOR, 1, 0);
+
+	} else if (type == SYSRESET_WARM && reset2_supported) {
 		/*
 		 * reset_type[31] = 0 (architectural)
 		 * reset_type[30:0] = 0 (SYSTEM_WARM_RESET)
