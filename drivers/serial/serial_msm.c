@@ -180,6 +180,15 @@ static long msm_uart_clk_init(struct udevice *dev)
 
 	rate = clk_set_rate(&clk, priv->clk_rate);
 
+	clk_enable(&clk);
+
+	ret = clk_get_by_name(dev, "iface", &clk);
+	if (ret < 0) {
+		pr_warn("%s: Failed to get clock: %d\n", __func__, ret);
+	} else {
+		clk_enable(&clk);
+	}
+
 	return rate;
 }
 
