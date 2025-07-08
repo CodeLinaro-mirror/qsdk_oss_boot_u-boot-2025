@@ -127,6 +127,7 @@ libs-y += drivers/
 libs-$(CONFIG_SPL_MEMORY) += drivers/memory/
 libs-$(CONFIG_SPL_USB_GADGET) += drivers/usb/dwc3/
 libs-$(CONFIG_SPL_USB_GADGET) += drivers/usb/cdns3/
+libs-$(CONFIG_SPL_SMEM) += drivers/smem/
 libs-y += dts/
 libs-y += fs/
 libs-$(CONFIG_SPL_POST_MEM_SUPPORT) += post/drivers/
