@@ -48,6 +48,13 @@ config PINCTRL_QCOM_IPQ5200
 	  Say Y here to enable support for pinctrl on the IPQ5200 SoC,
 	  as well as the associated GPIO driver.
 
+config PINCTRL_QCOM_IPQ9670
+	bool "Qualcomm IPQ9670 GCC"
+	select PINCTRL_QCOM
+	help
+	  Say Y here to enable support for pinctrl on the IPQ9670 SoC,
+	  as well as the associated GPIO driver.
+
 config PINCTRL_QCOM_IPQ9574
 	bool "Qualcomm IPQ9574 GCC"
 	select PINCTRL_QCOM
