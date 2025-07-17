@@ -553,10 +553,16 @@ static int qcom_pcie_parse_dt(struct udevice *dev)
 		return ret;
 	}
 
+	/* If PHY retrieval fails for reasons other than
+	 * it being absent (ENOENT), log the error and
+	 * return the failure code.
+	 */
 	ret = generic_phy_get_by_index(dev, 0, &priv->phy);
 	if (ret) {
-		dev_err(dev, "failed to get pcie phy (%d)\n", ret);
-		return ret;
+		if (ret != -ENOENT) {
+			dev_err(dev, "failed to get pcie phy (%d)\n", ret);
+			return ret;
+		}
 	}
 
 	for (vreg = 0; vreg < NUM_SUPPLIES; ++vreg) {
