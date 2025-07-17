@@ -56,6 +56,8 @@ struct qcom_pcie {
 	struct qcom_pcie_ops *ops;
 	struct udevice *vregs[NUM_SUPPLIES];
 	int id;
+	u32 max_link_speed;
+	u32 num_lanes;
 };
 
 /* PARF registers */
@@ -341,20 +343,51 @@ static void qcom_pcie_configure(struct qcom_pcie *priv)
 
 	dw_pcie_dbi_write_enable(&priv->dw, true);
 
+	clrsetbits_le32(priv->dw.dbi_base + PCIE_LINK_CAPABILITY,
+			TARGET_LINK_SPEED_MASK, priv->max_link_speed);
+
+	clrsetbits_le32(priv->dw.dbi_base + PCIE_LINK_CTL_2,
+			TARGET_LINK_SPEED_MASK, priv->max_link_speed);
+
 	val = readl(priv->dw.dbi_base + PCIE_PORT_LINK_CONTROL);
 	val &= ~PORT_LINK_FAST_LINK_MODE;
 	val |= PORT_LINK_DLL_LINK_EN;
 	val &= ~PORT_LINK_MODE_MASK;
-	val |= PORT_LINK_MODE_2_LANES;
+	switch (priv->num_lanes) {
+	case 1:
+		val |= PORT_LINK_MODE_1_LANES;
+		break;
+	case 2:
+		val |= PORT_LINK_MODE_2_LANES;
+		break;
+	case 4:
+		val |= PORT_LINK_MODE_4_LANES;
+		break;
+	default:
+		dev_err(priv->dw.dev, "num-lanes %u: invalid value\n",
+			priv->num_lanes);
+		goto out;
+	}
 	writel(val, priv->dw.dbi_base + PCIE_PORT_LINK_CONTROL);
 
 	val = readl(priv->dw.dbi_base + PCIE_LINK_WIDTH_SPEED_CONTROL);
 	val &= ~PORT_LOGIC_LINK_WIDTH_MASK;
-	val |= PORT_LOGIC_LINK_WIDTH_2_LANES;
+	switch (priv->num_lanes) {
+	case 1:
+		val |= PORT_LOGIC_LINK_WIDTH_1_LANES;
+		break;
+	case 2:
+		val |= PORT_LOGIC_LINK_WIDTH_2_LANES;
+		break;
+	case 4:
+		val |= PORT_LOGIC_LINK_WIDTH_4_LANES;
+		break;
+	}
 	writel(val, priv->dw.dbi_base + PCIE_LINK_WIDTH_SPEED_CONTROL);
 
-	qcom_pcie_set_lanes(priv, 2);
+	qcom_pcie_set_lanes(priv, priv->num_lanes);
 
+out:
 	dw_pcie_dbi_write_enable(&priv->dw, false);
 }
 
@@ -533,6 +566,9 @@ static int qcom_pcie_parse_dt(struct udevice *dev)
 	}
 
 	priv->id = dev_read_u32_default(dev, "id", 0);
+	priv->max_link_speed = dev_read_u32_default(dev, "max-link-speed",
+						    LINK_SPEED_GEN_3);
+	priv->num_lanes = dev_read_u32_default(dev, "num-lanes", 2);
 
 	return 0;
 }
