@@ -213,8 +213,8 @@ static int check_write_done(struct qup_i2c_priv *qup)
 	u32 val;
 	int ret = 0;
 
-	ret = readl_poll_sleep_timeout(qup->base + QUP_OPERATIONAL ,
-				       val, val & BIT(4),
+	ret = readl_poll_sleep_timeout(qup->base + QUP_OPERATIONAL,
+				       val, !(val & BIT(4)),
 				       10, TOUT_CNT * 10);
 	return ret;
 }
@@ -615,8 +615,8 @@ static int qup_i2c_probe_chip(struct udevice *dev, uint chip_addr,
 	if (ret)
 		goto out;
 
-	ret = readl_poll_sleep_timeout(qup->base + QUP_OPERATIONAL ,
-				       val, !(val & QUP_OUT_SVC_FLAG),
+	ret = readl_poll_sleep_timeout(qup->base + QUP_OPERATIONAL,
+				       val, val & QUP_OUT_SVC_FLAG,
 				       10, 1000);
 
 	if (ret)
@@ -631,8 +631,8 @@ static int qup_i2c_probe_chip(struct udevice *dev, uint chip_addr,
 		goto out;
 	}
 
-	ret = readl_poll_sleep_timeout(qup->base + QUP_OPERATIONAL ,
-				       val, !(val & QUP_IN_SVC_FLAG),
+	ret = readl_poll_sleep_timeout(qup->base + QUP_OPERATIONAL,
+				       val, val & QUP_IN_SVC_FLAG,
 				       10, 1000);
 
 	if (ret)
