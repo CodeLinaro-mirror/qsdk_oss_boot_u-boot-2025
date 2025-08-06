@@ -58,4 +58,14 @@ config ZYNQMP_IPI
 	help
 	  This enables support for the Xilinx ZynqMP Inter Processor Interrupt
 	  communication controller.
+
+config QCOM_TMEL_QMP
+	bool "QCOM Mailbox Protocol(QMP) for TMEL SS"
+	depends on DM_MAILBOX && ARCH_IPQ
+	help
+	  Say yes to add support for the QMP Mailbox Protocol driver for
+	  Trust Management Engine Lite Sub System (TMEL SS).
+	  QMP is a lightweight communication protocol for sending messages to
+	  TMEL. This protocol fits into the Generic Mailbox Framework.
+	  QMP uses mailbox registers.
 endmenu
