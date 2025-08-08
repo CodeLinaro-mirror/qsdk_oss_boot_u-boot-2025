@@ -804,6 +804,7 @@ config ARCH_IPQ
 	select MSM_SMEM
 	imply OF_UPSTREAM
 	imply CMD_DM
+	select SUPPORT_SPL
 
 config ARCH_KEYSTONE
 	bool "TI Keystone"
