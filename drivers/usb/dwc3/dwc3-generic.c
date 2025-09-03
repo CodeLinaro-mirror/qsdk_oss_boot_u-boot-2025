@@ -120,6 +120,26 @@ static int dwc3_generic_probe(struct udevice *dev,
 	priv->base = map_physmem(plat->base, DWC3_OTG_REGS_END, MAP_NOCACHE);
 	dwc3->regs = priv->base + DWC3_GLOBALS_REGS_START;
 
+	 if (device_is_compatible(dev->parent, "qcom,dwc3")) {
+		uint32_t cfg_val;
+
+		rc = dev_read_u32u(dev->parent, "qcom,quirk-ref-clk-per",
+				   &cfg_val);
+		if (!rc) {
+			dwc3_writel(dwc3->regs, DWC3_GUCTL, cfg_val);
+			if (dwc3_readl(dwc3->regs, DWC3_GUCTL) != cfg_val)
+				debug("Failed to set GUCTL register\n");
+		}
+
+		rc = dev_read_u32u(dev->parent, "qcom,quirk-ref-clk-adj",
+				   &cfg_val);
+		if (!rc) {
+			dwc3_writel(dwc3->regs, DWC3_GFLADJ, cfg_val);
+			if (dwc3_readl(dwc3->regs, DWC3_GFLADJ) != cfg_val)
+				debug("Failed to set GFLADJ register\n");
+		}
+	}
+
 	rc =  dwc3_init(dwc3);
 	if (rc) {
 		unmap_physmem(priv->base, MAP_NOCACHE);
