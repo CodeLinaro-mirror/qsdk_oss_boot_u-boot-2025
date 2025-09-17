@@ -407,3 +407,8 @@ config PHY_QCA_8033
 	bool "QCA Ethernet QCA8033 support"
 	---help---
 	  Adds support for the QCA Ethernet QCA8033.
+
+config PHY_QCA_8337
+	bool "QCA Ethernet QCA8337 support"
+	---help---
+	  Adds support for the QCA Ethernet QCA8337.
