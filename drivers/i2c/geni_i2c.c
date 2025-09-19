@@ -93,20 +93,35 @@ struct geni_i2c_priv {
  * time of low period of SCL: t_low = (t_low_cnt * clk_div) / source_clock
  * time of full period of SCL: t_cycle = (t_cycle_cnt * clk_div) / source_clock
  * clk_freq_out = t / t_cycle
- * source_clock = 19.2 MHz
+ * source_clock = 19.2 MHz (default)
  */
-static const struct geni_i2c_clk_fld geni_i2c_clk_map[] = {
+static const struct geni_i2c_clk_fld geni_i2c_clk_map_19p2mhz[] = {
 	{I2C_SPEED_STANDARD_RATE, 7, 10, 11, 26},
 	{I2C_SPEED_FAST_RATE, 2,  5, 12, 24},
 	{I2C_SPEED_FAST_PLUS_RATE, 1, 3,  9, 18},
 };
 
-static int geni_i2c_clk_map_idx(struct geni_i2c_priv *geni, unsigned int clk_freq)
-{
-	const struct geni_i2c_clk_fld *itr = geni_i2c_clk_map;
-	int i;
+/* source_clock = 32 MHz */
+static const struct geni_i2c_clk_fld geni_i2c_clk_map_32mhz[] = {
+	{I2C_SPEED_STANDARD_RATE, 12, 9, 10, 25},
+	{I2C_SPEED_FAST_RATE, 4,  3,  9, 19},
+	{I2C_SPEED_FAST_PLUS_RATE, 2, 3,  5, 15},
+};
 
-	for (i = 0; i < ARRAY_SIZE(geni_i2c_clk_map); i++, itr++) {
+static int geni_i2c_clk_map_idx(struct geni_i2c_priv *geni, unsigned int clk_freq, bool use_32mhz)
+{
+	const struct geni_i2c_clk_fld *itr;
+	int i, array_size;
+
+	if (use_32mhz) {
+		itr = geni_i2c_clk_map_32mhz;
+		array_size = ARRAY_SIZE(geni_i2c_clk_map_32mhz);
+	} else {
+		itr = geni_i2c_clk_map_19p2mhz;
+		array_size = ARRAY_SIZE(geni_i2c_clk_map_19p2mhz);
+	}
+
+	for (i = 0; i < array_size; i++, itr++) {
 		if (itr->clk_freq_out == clk_freq) {
 			geni->clk_fld = itr;
 			return 0;
@@ -259,6 +274,39 @@ static int geni_i2c_xfer_rx(struct geni_i2c_priv *geni, struct i2c_msg *msg, u32
 	geni_i2c_setup_m_cmd(geni, I2C_READ, params);
 
 	return geni_i2c_fifo_rx_drain(geni, msg);
+}
+
+/* Probe to see if a chip is present. */
+static int geni_i2c_probe_chip(struct udevice *dev, uint chip_addr, uint chip_flags)
+{
+	struct geni_i2c_priv *geni = dev_get_priv(dev);
+	u32 m_param = 0;
+	u32 status;
+	ulong start;
+
+	/* Add delay before chip detect to prevent bus going to undefined state */
+	mdelay(1);
+
+	qcom_geni_i2c_conf(geni);
+
+	writel(0, geni->base + SE_I2C_TX_TRANS_LEN);
+
+	m_param |= ((chip_addr << SLV_ADDR_SHFT) & SLV_ADDR_MSK);
+	geni_i2c_setup_m_cmd(geni, I2C_ADDR_ONLY, m_param);
+
+	writel(1, geni->base + SE_GENI_TX_WATERMARK_REG);
+
+	start = get_timer(0);
+	while (get_timer(start) < I2C_TIMEOUT_MS) {
+		status = readl(geni->base + SE_GENI_M_IRQ_STATUS);
+		if (status & M_CMD_DONE_EN) {
+			writel(status, geni->base + SE_GENI_M_IRQ_CLEAR);
+			return (status & SE_I2C_ERR) ? -ENODEV : 0;
+		}
+		udelay(10);
+	}
+
+	return -ETIMEDOUT;
 }
 
 static int geni_i2c_xfer(struct udevice *bus, struct i2c_msg msgs[], int num)
@@ -543,19 +591,25 @@ static int geni_i2c_probe(struct udevice *dev)
 	geni_i2c_config_packing(geni, BITS_PER_BYTE,
 				PACKING_BYTES_PW, true, true, true);
 
-	/* Setup for standard rate */
-	return geni_i2c_clk_map_idx(geni, I2C_SPEED_STANDARD_RATE);
+	/* Setup clock frequency from device tree */
+	u32 clk_freq = dev_read_u32_default(dev, "clock-frequency", I2C_SPEED_STANDARD_RATE);
+	/* Check if 32MHz clock table should be used, default to 19.2MHz for compatibility */
+	bool use_32mhz = dev_read_bool(dev, "qcom,geni-se-clk-32mhz");
+	return geni_i2c_clk_map_idx(geni, clk_freq, use_32mhz);
 }
 
 static int geni_i2c_set_bus_speed(struct udevice *dev, unsigned int clk_freq)
 {
 	struct geni_i2c_priv *geni = dev_get_priv(dev);
+	/* Check if 32MHz clock table should be used, default to 19.2MHz for compatibility */
+	bool use_32mhz = dev_read_bool(dev, "qcom,geni-se-clk-32mhz");
 
-	return geni_i2c_clk_map_idx(geni, clk_freq);
+	return geni_i2c_clk_map_idx(geni, clk_freq, use_32mhz);
 }
 
 static const struct dm_i2c_ops geni_i2c_ops = {
 	.xfer		= geni_i2c_xfer,
+	.probe_chip	= geni_i2c_probe_chip,
 	.set_bus_speed	= geni_i2c_set_bus_speed,
 };
 
