@@ -245,7 +245,7 @@ static int msm_serial_setbrg(struct udevice *dev, int baud)
 static bool qcom_geni_serial_poll_bit(const struct udevice *dev, int offset,
 				      int field, bool set)
 {
-	u32 reg;
+	u32 reg = 0;
 	struct msm_serial_data *priv = dev_get_priv(dev);
 	unsigned int baud;
 	unsigned int tx_fifo_depth;
@@ -255,21 +255,30 @@ static bool qcom_geni_serial_poll_bit(const struct udevice *dev, int offset,
 
 	baud = 115200;
 
-	if (priv) {
-		baud = priv->baud;
-		if (!baud)
-			baud = 115200;
-		tx_fifo_depth = geni_se_get_tx_fifo_depth(dev);
-		tx_fifo_width = geni_se_get_tx_fifo_width(priv->base);
-		fifo_bits = tx_fifo_depth * tx_fifo_width;
-		/*
-		 * Total polling iterations based on FIFO worth of bytes to be
-		 * sent at current baud. Add a little fluff to the wait.
-		 */
-		timeout_us = ((fifo_bits * USEC_PER_SEC) / baud) + 500;
+	if (!priv) {
+		pr_err("%s: Invalid private pointer\n", __func__);
+		return false;
 	}
 
+	if (!priv->base) {
+		pr_err("%s: Invalid base address\n", __func__);
+		return false;
+	}
+
+	baud = priv->baud;
+	if (!baud)
+		baud = 115200;
+	tx_fifo_depth = geni_se_get_tx_fifo_depth(dev);
+	tx_fifo_width = geni_se_get_tx_fifo_width(priv->base);
+	fifo_bits = tx_fifo_depth * tx_fifo_width;
+	/*
+	 * Total polling iterations based on FIFO worth of bytes to be
+	 * sent at current baud. Add a little fluff to the wait.
+	 */
+	timeout_us = ((fifo_bits * USEC_PER_SEC) / baud) + 500;
+
 	timeout_us = DIV_ROUND_UP(timeout_us, 10) * 10;
+
 	while (timeout_us) {
 		reg = readl(priv->base + offset);
 		if ((bool)(reg & field) == set)
