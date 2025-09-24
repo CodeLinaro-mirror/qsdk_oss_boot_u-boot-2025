@@ -95,3 +95,4 @@ obj-$(CONFIG_SL28CPLD) += sl28cpld.o
 obj-$(CONFIG_SPL_SOCFPGA_DT_REG) += socfpga_dtreg.o
 obj-$(CONFIG_QCOM_GENI_SE) += qcom-geni-se.o
 obj-$(CONFIG_NOR_BLK) += qti_nor_blk.o
+obj-$(CONFIG_QCOM_TMELCOM) += tmelcom.o
