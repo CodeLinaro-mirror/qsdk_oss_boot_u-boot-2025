@@ -3949,6 +3949,45 @@ static void s25fl256l_late_init(struct spi_nor *nor,
 static struct spi_nor_fixups s25fl256l_fixups = {
 	.late_init = s25fl256l_late_init,
 };
+
+static int s25fl129p_erase_non_uniform(struct spi_nor *nor, loff_t addr)
+{
+	/* Support 8 x 4KB sectors at bottom */
+	return spansion_erase_non_uniform(nor, addr, SPINOR_OP_BE_4K, 0,
+					  SZ_32K);
+}
+
+static int s25fl129p_setup(struct spi_nor *nor, const struct flash_info *info,
+			   const struct spi_nor_flash_parameter *params)
+{
+	int ret;
+	u8 cr;
+
+	/*
+	 * Read CFR3V to check if uniform sector is selected. If not, assign an
+	 * erase hook that supports non-uniform erase.
+	 */
+	ret = spansion_read_any_reg(nor, SPINOR_REG_CYPRESS_CFR3V, 0, &cr);
+	if (ret)
+	{
+		debug("Failed to read CFR3V register: %d\n", ret);
+		return ret;
+	}
+	if (!(cr & SPINOR_REG_CYPRESS_CFR3_UNISECT))
+		nor->erase = s25fl129p_erase_non_uniform;
+
+	return spi_nor_default_setup(nor, info, params);
+}
+
+static void s25fl129p_late_init(struct spi_nor *nor,
+			      struct spi_nor_flash_parameter *params)
+{
+	nor->setup = s25fl129p_setup;
+}
+
+static struct spi_nor_fixups s25fl129p_fixups = {
+	.late_init = s25fl129p_late_init,
+};
 #endif
 
 #ifdef CONFIG_SPI_FLASH_S28HX_T
@@ -4415,6 +4454,9 @@ void spi_nor_set_fixups(struct spi_nor *nor)
 			break;
 		}
 	}
+
+	if (!strcmp(nor->info->name, "s25fl129p1"))
+		nor->fixups = &s25fl129p_fixups;
 
 	if (CONFIG_IS_ENABLED(SPI_FLASH_BAR) &&
 	    !strcmp(nor->info->name, "s25fl256l"))
