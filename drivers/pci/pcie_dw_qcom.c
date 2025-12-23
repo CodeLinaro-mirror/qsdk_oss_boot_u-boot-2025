@@ -728,7 +728,7 @@ static const struct qcom_pcie_ops ops_ipq5424 = {
 	.clear_sid = qcom_pcie_clear_sidtable,
 };
 
-static const struct qcom_pcie_ops ops_ipq5200 = {
+static const struct qcom_pcie_ops ops_ipq5210 = {
 	.config_sid = NULL,
 	.sku = NULL,
 	.clear_sid = qcom_pcie_clear_sidtable,
@@ -749,7 +749,7 @@ static const struct udevice_id qcom_pcie_ids[] = {
 	{ .compatible = "qcom,pcie-sm8550", .data = (ulong)&ops_1_9_0 },
 	{ .compatible = "qcom,pcie-x1e80100", .data = (ulong)&ops_1_9_0 },
 	{ .compatible = "qcom,pcie-ipq9574", .data = (ulong) &ops_ipq9574},
-	{ .compatible = "qcom,pcie-ipq5200", .data = (ulong) &ops_ipq5200},
+	{ .compatible = "qcom,pcie-ipq5210", .data = (ulong) &ops_ipq5210},
 	{ .compatible = "qcom,pcie-ipq5332", .data = (ulong) &ops_ipq5332},
 	{ .compatible = "qcom,pcie-ipq5424", .data = (ulong) &ops_ipq5424},
 	{ }
