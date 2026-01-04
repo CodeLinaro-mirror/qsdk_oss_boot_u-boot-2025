@@ -790,18 +790,10 @@ static int ext4fs_write_file(struct ext2_inode *file_inode,
 		long int blknr;
 		int blockend = fs->blksz;
 		int skipfirst = 0;
-#ifdef CONFIG_FS_CRASHDUMP_ENCRYPTED
-	/* Notify that we're reading file data (disable encryption) */
-	fs_crashdump_encrypted_notify_file_data(false, delayed_extent);
-#endif
 		blknr = read_allocated_block(file_inode, i, NULL);
 		if (blknr <= 0)
 			return -1;
 
-#ifdef CONFIG_FS_CRASHDUMP_ENCRYPTED
-	/* Notify that we're writing file data (enable encryption) */
-	fs_crashdump_encrypted_notify_file_data(true, delayed_extent);
-#endif
 		blknr = blknr << log2_fs_blocksize;
 
 		if (blknr) {
@@ -810,10 +802,17 @@ static int ext4fs_write_file(struct ext2_inode *file_inode,
 					delayed_extent += blockend;
 					delayed_next += blockend >> log2blksz;
 				} else {	/* spill */
+
+#ifdef CONFIG_FS_CRASHDUMP_ENCRYPTED
+		fs_crashdump_encrypted_notify_file_data(true, delayed_extent);
+#endif
 					put_ext4((uint64_t)
 						 ((uint64_t)delayed_start << log2blksz),
 						 delayed_buf,
 						 (uint32_t) delayed_extent);
+#ifdef CONFIG_FS_CRASHDUMP_ENCRYPTED
+		fs_crashdump_encrypted_notify_file_data(false, delayed_extent);
+#endif
 					previous_block_number = blknr;
 					delayed_start = blknr;
 					delayed_extent = blockend;
@@ -832,10 +831,17 @@ static int ext4fs_write_file(struct ext2_inode *file_inode,
 		} else {
 			if (previous_block_number != -1) {
 				/* spill */
+
+#ifdef CONFIG_FS_CRASHDUMP_ENCRYPTED
+		fs_crashdump_encrypted_notify_file_data(true, delayed_extent);
+#endif
 				put_ext4((uint64_t) ((uint64_t)delayed_start <<
 						     log2blksz),
 					 delayed_buf,
 					 (uint32_t) delayed_extent);
+#ifdef CONFIG_FS_CRASHDUMP_ENCRYPTED
+		fs_crashdump_encrypted_notify_file_data(false, delayed_extent);
+#endif
 				previous_block_number = -1;
 			}
 		}
@@ -844,14 +850,12 @@ static int ext4fs_write_file(struct ext2_inode *file_inode,
 	if (previous_block_number != -1) {
 		/* spill */
 #ifdef CONFIG_FS_CRASHDUMP_ENCRYPTED
-		/* Notify that we're writing file data (enable encryption) */
 		fs_crashdump_encrypted_notify_file_data(true, delayed_extent);
 #endif
 		put_ext4((uint64_t) ((uint64_t)delayed_start << log2blksz),
 			 delayed_buf, (uint32_t) delayed_extent);
 		previous_block_number = -1;
 #ifdef CONFIG_FS_CRASHDUMP_ENCRYPTED
-		/* Notify that we're completed writing file data (disable encryption) */
 		fs_crashdump_encrypted_notify_file_data(false, delayed_extent);
 #endif
 	}
