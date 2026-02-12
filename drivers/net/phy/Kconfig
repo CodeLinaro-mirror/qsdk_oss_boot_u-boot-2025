@@ -412,3 +412,9 @@ config PHY_QCA_8337
 	bool "QCA Ethernet QCA8337 support"
 	---help---
 	  Adds support for the QCA Ethernet QCA8337.
+
+config PHY_QCE_1204
+	bool "QCA Ethernet 4 port QCE1204 phy mode support"
+	---help---
+	Adds support for the QCA Ethernet QCE1204 PHY with QUSGMII interface.
+
