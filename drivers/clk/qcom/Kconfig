@@ -5,6 +5,12 @@ config CLK_QCOM
 	depends on CLK && DM_RESET && POWER_DOMAIN
 	def_bool n
 
+config CLK_QCOM_PLL
+	bool "Qualcomm generic PLL clock support"
+	depends on CLK && DM
+	help
+	  Enable a generic PLL clock framework for IPQ platforms.
+
 menu "Qualcomm clock drivers"
 
 config CLK_QCOM_APQ8016
