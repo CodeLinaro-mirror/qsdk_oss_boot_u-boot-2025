@@ -47,6 +47,14 @@ config CLK_QCOM_IPQ5424
 	  on the Snapdragon IPQ5424 SoC. This driver supports the clocks
 	  and resets exposed by the GCC hardware block.
 
+config CLK_QCOM_NSSCC_QCE2204
+	bool "Qualcomm NSSCC QCE2204"
+	select CLK_QCOM
+	help
+	  Say Y here to enable support for the NSS Clock Controller
+	  on the QCE2204. This driver supports the clocks
+	  and resets exposed by the NSSCC hardware block.
+
 config CLK_QCOM_IPQ5210
 	bool "Qualcomm IPQ5210 GCC"
 	select CLK_QCOM
