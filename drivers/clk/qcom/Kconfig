@@ -11,6 +11,12 @@ config CLK_QCOM_PLL
 	help
 	  Enable a generic PLL clock framework for IPQ platforms.
 
+config CLK_QCOM_ALL
+       bool "Qualcomm generic ALL clock support"
+       depends on CLK && DM
+       help
+         Enable a generic ALL clock framework for IPQ platforms.
+
 menu "Qualcomm clock drivers"
 
 config CLK_QCOM_APQ8016
