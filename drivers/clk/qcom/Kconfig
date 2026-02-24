@@ -61,6 +61,16 @@ config CLK_QCOM_NSSCC_QCE2204
 	  on the QCE2204. This driver supports the clocks
 	  and resets exposed by the NSSCC hardware block.
 
+config CLK_QCOM_CMN_PLL
+	bool "Qualcomm CMN PLL"
+	select CLK_QCOM
+	help
+	  Say Y here to enable support for the CMN PLL derives
+	  its reference clock from the on-board Wi-Fi
+	  block and supplies fixed-rate clocks to networking hardware
+	  and the GCC, including PPE, external PHY or switch devices,
+	  and the PCS.
+
 config CLK_QCOM_IPQ5210
 	bool "Qualcomm IPQ5210 GCC"
 	select CLK_QCOM
