@@ -34,6 +34,7 @@ obj-$(CONFIG_PHY_QCA_8081) += qcom_qca8081.o
 obj-$(CONFIG_PHY_QCA_81XX) += qcom_qca81xx.o
 obj-$(CONFIG_PHY_QCA_8033) += qcom_qca8033.o
 obj-$(CONFIG_PHY_QCE_1204) += qcom_qce1204.o
+obj-$(CONFIG_PHY_QCE_2204) += qcom_qce2204_ppe.o qcom_qce2204_ppe_mac.o
 obj-$(CONFIG_PHY_QCA_8337) += qcom_qca8337.o
 obj-$(CONFIG_PHY_REALTEK) += realtek.o
 obj-$(CONFIG_PHY_SMSC) += smsc.o
