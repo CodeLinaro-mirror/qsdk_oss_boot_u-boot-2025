@@ -72,6 +72,58 @@
 #define DISABLE_ALL_EXECPTIONS	\
 	(DAIF_FIQ_BIT | DAIF_IRQ_BIT | DAIF_ABT_BIT | DAIF_DBG_BIT)
 
+/* ----------------------------- */
+/*   AArch32 CPSR field macros   */
+/* ----------------------------- */
+
+/* AArch32 CPU modes (CPSR M[4:0]) */
+#define MODE32_USR     0x10
+#define MODE32_FIQ     0x11
+#define MODE32_IRQ     0x12
+#define MODE32_SVC     0x13
+#define MODE32_ABT     0x17
+#define MODE32_UND     0x1B
+#define MODE32_SYS     0x1F
+
+/* CPSR bits */
+#define CPSR_T_BIT     (1 << 5)   /* Thumb state */
+#define CPSR_F_BIT     (1 << 6)   /* FIQ mask */
+#define CPSR_I_BIT     (1 << 7)   /* IRQ mask */
+#define CPSR_A_BIT     (1 << 8)   /* Abort mask */
+#define CPSR_E_BIT     (1 << 9)   /* Endianness: 0 = little, 1 = big */
+
+/* Helpful masks */
+#define CPSR_AIF_MASK  (CPSR_A_BIT | CPSR_I_BIT | CPSR_F_BIT)
+
+/*
+ * Create an AArch32 SPSR (CPSR format).
+ *
+ * mode  : MODE32_*
+ * thumb : 0 = ARM, 1 = Thumb
+ * aif   : OR'd combination of CPSR_A_BIT | CPSR_I_BIT | CPSR_F_BIT
+ * endian: 0 = little-endian, 1 = big-endian
+ */
+#define SPSR_32(mode, thumb, aif, endian)       \
+    (((mode) & 0x1F) |                          \
+     ((thumb) ? CPSR_T_BIT : 0) |               \
+     ((aif) & CPSR_AIF_MASK) |                  \
+     ((endian) ? CPSR_E_BIT : 0))
+
+/* Common preset values */
+
+/* SVC mode, ARM state, A/I/F masked, LE — RECOMMENDED for BL33 */
+#define SPSR_32_SVC_ARM_MASKED_LE \
+    SPSR_32(MODE32_SVC, 0, CPSR_AIF_MASK, 0)
+
+/* SVC mode, Thumb state */
+#define SPSR_32_SVC_THUMB_MASKED_LE \
+    SPSR_32(MODE32_SVC, 1, CPSR_AIF_MASK, 0)
+
+/* System mode, ARM state */
+#define SPSR_32_SYS_ARM_MASKED_LE \
+    SPSR_32(MODE32_SYS, 0, CPSR_AIF_MASK, 0)
+
+
 #ifndef __ASSEMBLY__
 
 #include <linux/types.h>
