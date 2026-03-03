@@ -65,6 +65,7 @@ obj-$(CONFIG_MDIO_IPQ4019) += mdio-ipq4019.o
 obj-$(CONFIG_MDIO_GPIO_BITBANG) += mdio_gpio.o
 obj-$(CONFIG_MDIO_IPQ_BITBANGMII) += mdio-ipq-bb.o
 obj-$(CONFIG_MDIO_QCOM_I2C) += mdio-qcom-i2c.o
+obj-$(CONFIG_MDIO_AHB) += mdio-ahb.o
 obj-$(CONFIG_MDIO_MUX_I2CREG) += mdio_mux_i2creg.o
 obj-$(CONFIG_MDIO_MUX_MESON_G12A) += mdio_mux_meson_g12a.o
 obj-$(CONFIG_MDIO_MUX_MESON_GXL) += mdio_mux_meson_gxl.o
