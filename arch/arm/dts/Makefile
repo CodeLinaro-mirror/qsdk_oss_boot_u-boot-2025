@@ -9,6 +9,7 @@ dtb-$(CONFIG_TARGET_IPQ5210) += ipq5210-emulation.dtb \
 				ipq5210-rdp502.dtb \
 				ipq5210-rdp503.dtb \
 				ipq5210-rdp504.dtb \
+				ipq5210-rdp505.dtb \
 				ipq5210-db-hm01.1.dtb \
 				ipq5210-db-hm02.1.dtb
 
