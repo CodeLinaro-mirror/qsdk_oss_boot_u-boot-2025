@@ -5,6 +5,18 @@ config CLK_QCOM
 	depends on CLK && DM_RESET && POWER_DOMAIN
 	def_bool n
 
+config CLK_QCOM_PLL
+	bool "Qualcomm generic PLL clock support"
+	depends on CLK && DM
+	help
+	  Enable a generic PLL clock framework for IPQ platforms.
+
+config CLK_QCOM_ALL
+       bool "Qualcomm generic ALL clock support"
+       depends on CLK && DM
+       help
+         Enable a generic ALL clock framework for IPQ platforms.
+
 menu "Qualcomm clock drivers"
 
 config CLK_QCOM_APQ8016
@@ -46,6 +58,24 @@ config CLK_QCOM_IPQ5424
 	  Say Y here to enable support for the Global Clock Controller
 	  on the Snapdragon IPQ5424 SoC. This driver supports the clocks
 	  and resets exposed by the GCC hardware block.
+
+config CLK_QCOM_NSSCC_QCE2204
+	bool "Qualcomm NSSCC QCE2204"
+	select CLK_QCOM
+	help
+	  Say Y here to enable support for the NSS Clock Controller
+	  on the QCE2204. This driver supports the clocks
+	  and resets exposed by the NSSCC hardware block.
+
+config CLK_QCOM_CMN_PLL
+	bool "Qualcomm CMN PLL"
+	select CLK_QCOM
+	help
+	  Say Y here to enable support for the CMN PLL derives
+	  its reference clock from the on-board Wi-Fi
+	  block and supplies fixed-rate clocks to networking hardware
+	  and the GCC, including PPE, external PHY or switch devices,
+	  and the PCS.
 
 config CLK_QCOM_IPQ5210
 	bool "Qualcomm IPQ5210 GCC"
