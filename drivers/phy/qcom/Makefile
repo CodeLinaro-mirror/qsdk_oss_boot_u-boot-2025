@@ -12,3 +12,4 @@ obj-$(CONFIG_PHY_QCOM_USB_HS_M31) += phy-qcom-usb-hs-m31.o
 obj-$(CONFIG_PHY_QCOM_UNI_SSPHY) += phy-qcom-uni-ssphy.o
 obj-$(CONFIG_PHY_QCOM_QUSB2) += phy-qcom-qusb2.o
 obj-$(CONFIG_PHY_QCOM_QMP_USB3) += phy-qcom-qmp-usb3.o
+obj-$(CONFIG_PHY_QCOM_USB_FEMTO) += phy-qcom-usb-femto-hs.o
