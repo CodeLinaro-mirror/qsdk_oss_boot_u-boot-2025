@@ -97,3 +97,11 @@ config PHY_QCOM_QMP_USB3
 	help
 	  Enable this to support the Super-Speed USB transceiver on various
 	  Qualcomm IPQ chipsets.
+
+config PHY_QCOM_USB_FEMTO
+        tristate "Qualcomm FEMTO USB HS PHY"
+        depends on PHY && ARCH_IPQ
+        help
+          Enable this to support the High-Speed Femto USB transceiver on various
+          Qualcomm IPQ chipsets.
+
