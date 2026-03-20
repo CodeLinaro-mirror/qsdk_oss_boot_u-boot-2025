@@ -1049,6 +1049,15 @@ config MDIO_QCOM_I2C
 	  This driver supports the MDIO - I2C interface software driver for
 	  Qualcomm IPQ series Soc-s.
 
+config MDIO_AHB
+	bool "Qualcomm MDIO - AHB memory-mapped PHY interface support"
+	depends on DM_MDIO
+	help
+	  This driver supports the AHB memory-mapped MDIO interface for
+	  Qualcomm IPQ52xx SoC internal PHY access. It provides direct
+	  register access to the internal PHY via AHB bus mapping, used
+	  for the IPQ52xx built-in Ethernet PHY (IPQ52XX_PHY_TYPE).
+
 config MVMDIO
 	bool "Marvell MDIO interface support"
 	depends on DM_MDIO
