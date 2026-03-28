@@ -1,5 +1,16 @@
 # SPDX-License-Identifier: GPL-2.0+
 
+ifdef CONFIG_IPQ_TINY
+dtb-$(CONFIG_TARGET_IPQ5210) += ipq5210-rdp497.dtb \
+				ipq5210-rdp498.dtb \
+				ipq5210-rdp499.dtb \
+				ipq5210-rdp500.dtb \
+				ipq5210-rdp501.dtb \
+				ipq5210-rdp502.dtb \
+				ipq5210-rdp503.dtb \
+				ipq5210-rdp504.dtb \
+				ipq5210-rdp505.dtb
+else
 dtb-$(CONFIG_TARGET_IPQ5210) += ipq5210-emulation.dtb \
 				ipq5210-rdp497.dtb \
 				ipq5210-rdp498.dtb \
@@ -15,6 +26,7 @@ dtb-$(CONFIG_TARGET_IPQ5210) += ipq5210-emulation.dtb \
 				ipq5210-db-hm01.1.dtb \
 				ipq5210-db-hm02.1.dtb
 
+endif
 dtb-$(CONFIG_TARGET_IPQ9650) += ipq9650-emulation.dtb \
                                 ipq9650-rdp488.dtb \
                                 ipq9650-rdp489.dtb \
