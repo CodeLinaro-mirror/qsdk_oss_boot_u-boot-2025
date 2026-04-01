@@ -90,7 +90,7 @@ static void cyclic_run(void)
 
 void schedule(void)
 {
-	static uint32_t iter;
+	static uint32_t iter __section(".data");
 	/*
 	 * schedule() function takes ~1 milli seconds so to improve the
 	 * boot-time, the schedule() function is restricted to execute
