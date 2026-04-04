@@ -1094,6 +1094,16 @@ static const struct qmp_pcie_offsets qmp_pcie_offsets_9650_v4x1 = {
 	.rx		= 0x0400,
 };
 
+static const struct qmp_pcie_offsets qmp_pcie_offsets_v4x2 = {
+	.serdes		= 0,
+	.pcs		= 0x0a00,
+	.pcs_misc	= 0x0e00,
+	.tx		= 0x0200,
+	.rx		= 0x0400,
+	.tx2		= 0x0600,
+	.rx2		= 0x0800,
+};
+
 static const struct qmp_pcie_cfg sm8550_qmp_gen3x2_pciephy_cfg = {
 	.lanes = 2,
 
@@ -1295,7 +1305,7 @@ static const struct qmp_pcie_cfg ipq9650_gen3x1_pciephy_cfg = {
 static const struct qmp_pcie_cfg ipq9650_gen3x2_pciephy_cfg = {
 	.lanes			= 2,
 
-	.offsets		= &qmp_pcie_offsets_9574_v4x2,
+	.offsets		= &qmp_pcie_offsets_v4x2,
 
 	.tbls = {
 		.serdes		= ipq9650_pcie_serdes_tbl,
