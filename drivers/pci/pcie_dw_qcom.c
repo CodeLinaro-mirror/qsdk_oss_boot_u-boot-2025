@@ -606,7 +606,7 @@ static int qcom_pcie_probe(struct udevice *dev)
 	if (ret)
 		return ret;
 
-	if (ops->sku && !(is_pcie_available(priv, ops->sku)))
+	if (ops && ops->sku && !(is_pcie_available(priv, ops->sku)))
 		return -ENXIO;
 
 	ret = qcom_pcie_init_port(dev);

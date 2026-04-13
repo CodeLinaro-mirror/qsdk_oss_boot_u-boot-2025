@@ -120,8 +120,13 @@ static void dm_pciauto_setup_device(struct udevice *dev,
 
 		ret = pciauto_region_allocate(bar_res, bar_size,
 					      &bar_value, found_mem64);
-		if (ret)
+		if (ret) {
+#if IS_ENABLED(CONFIG_ARM) || IS_ENABLED(CONFIG_ARM64)
+			debug("PCI: Failed autoconfig bar %x\n", bar);
+#else
 			printf("PCI: Failed autoconfig bar %x\n", bar);
+#endif
+		}
 
 		if (!ret) {
 			/* Write it out and update our limit */
