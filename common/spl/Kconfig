@@ -283,6 +283,18 @@ config SPL_TEXT_BASE
 	help
 	  The address in memory that SPL will be running from.
 
+config SPL_REMAKE_ELF
+	bool "Recreate an ELF image from raw SPL binary"
+	depends on SPL
+	help
+	  Enable this to recreate an ELF image (u-boot-spl.elf) from the raw
+	  SPL binary (u-boot-spl.bin). The ELF is built by wrapping the binary
+	  with a minimal linker script that places the image at SPL_TEXT_BASE
+	  and creates a proper PT_LOAD program header. This is equivalent to
+	  CONFIG_REMAKE_ELF for U-Boot proper and is useful when a downstream
+	  tool (e.g. a secure-boot signing utility) requires an ELF input
+	  rather than a raw binary.
+
 config SPL_SOC_INIT
 	bool "Call SoC-specific initialization in SPL"
 	help

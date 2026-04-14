@@ -265,6 +265,12 @@ endif
 
 INPUTS-y	+= $(obj)/$(SPL_BIN).bin $(obj)/$(SPL_BIN).sym
 
+# When CONFIG_SPL_REMAKE_ELF (or TPL_/VPL_ equivalent) is set, add the
+# ELF-wrapped binary to the build outputs.  The naming follows the same
+# PHASE_-based convention used throughout this file so the rule works
+# identically for SPL, TPL and VPL.
+INPUTS-$(CONFIG_$(PHASE_)REMAKE_ELF) += $(obj)/$(SPL_BIN).elf
+
 ifneq ($(CONFIG_ARCH_EXYNOS)$(CONFIG_ARCH_S5PC1XX),)
 INPUTS-y	+= $(obj)/$(BOARD)-spl.bin
 endif
@@ -480,6 +486,76 @@ quiet_cmd_sym ?= SYM     $@
       cmd_sym ?= $(OBJDUMP) -t $< > $@
 $(obj)/$(SPL_BIN).sym: $(obj)/$(SPL_BIN) FORCE
 	$(call if_changed,sym)
+
+# ---------------------------------------------------------------------------
+# ELF wrapping for xPL binary  (CONFIG_SPL_REMAKE_ELF / TPL / VPL)
+#
+# Mirrors CONFIG_REMAKE_ELF in the top-level Makefile and the manual steps
+# performed by scripts/jobs/QSDK_2.0_DAILY_BUILD.sh:
+#
+#   1. A minimal linker script is generated from the phase-specific text-base
+#      (CONFIG_SPL_TEXT_BASE / TPL / VPL) and text-size
+#      (CONFIG_SPL_TEXT_SIZE / TPL / VPL).  The script defines a single SRAM
+#      MEMORY region, a PT_LOAD program header and a .data section so that the
+#      resulting ELF carries the correct load address.
+#
+#   2. objcopy converts the raw binary to a relocatable ELF object, stamping
+#      the load/start address with --change-addresses / --set-start.
+#      PLATFORM_ELFFLAGS (set in arch/$(ARCH)/config.mk, e.g.
+#      "-B aarch64 -O elf64-littleaarch64" for ARM64) selects the correct
+#      output BFD target, making the rule generic across architectures.
+#
+#   3. ld links the object with the generated linker script to produce the
+#      final ELF with a correct PT_LOAD segment.
+#
+# The output is $(obj)/$(SPL_BIN).elf  (e.g. spl/u-boot-spl.elf).
+# ---------------------------------------------------------------------------
+
+# Phase-specific text base and size.
+# SPL_ELF_TEXT_SIZE falls back to 0x100000 (1 MiB) when not configured.
+SPL_ELF_TEXT_BASE := $(CONFIG_$(PHASE_)TEXT_BASE)
+SPL_ELF_TEXT_SIZE := $(if $(CONFIG_$(PHASE_)TEXT_SIZE),$(CONFIG_$(PHASE_)TEXT_SIZE),0x100000)
+
+# Generate the minimal ELF linker script for the xPL binary.
+quiet_cmd_spl_elf_lds = GEN     $@
+define cmd_spl_elf_lds
+	( \
+	printf 'MEMORY {\n'; \
+	printf '\tSRAM (rxw) : ORIGIN = %s, LENGTH = %s\n' \
+		"$(SPL_ELF_TEXT_BASE)" "$(SPL_ELF_TEXT_SIZE)"; \
+	printf '}\n'; \
+	printf 'PHDRS {\n\tptype PT_LOAD FLAGS(5);\n}\n'; \
+	printf 'ENTRY(_entry)\n'; \
+	printf 'SECTIONS {\n'; \
+	printf '\t. = %s;\n' "$(SPL_ELF_TEXT_BASE)"; \
+	printf '\t_entry = . ;\n'; \
+	printf '\t.data : { *(.data) . = ALIGN(4); } > SRAM :ptype\n'; \
+	printf '\t_end = .;\n'; \
+	printf '}\n'; \
+	) > $@
+endef
+
+$(obj)/$(SPL_BIN)-elf.lds: FORCE
+	$(call if_changed,spl_elf_lds)
+
+# Wrap the xPL binary into an ELF file.
+# Step 1: objcopy converts the raw binary to a relocatable ELF object and
+#         sets the load/start address to SPL_ELF_TEXT_BASE.
+# Step 2: ld links the object with the generated linker script to produce
+#         a final ELF with a correct PT_LOAD program header.
+quiet_cmd_spl_remake_elf = LD      $@
+define cmd_spl_remake_elf
+	$(OBJCOPY) -I binary $(PLATFORM_ELFFLAGS) \
+		--change-addresses $(SPL_ELF_TEXT_BASE) \
+		--set-start $(SPL_ELF_TEXT_BASE) \
+		$< $(obj)/$(SPL_BIN)-elf.o && \
+	$(LD) $(obj)/$(SPL_BIN)-elf.o \
+		-T $(obj)/$(SPL_BIN)-elf.lds \
+		-o $@
+endef
+
+$(obj)/$(SPL_BIN).elf: $(obj)/$(SPL_BIN).bin $(obj)/$(SPL_BIN)-elf.lds FORCE
+	$(call if_changed,spl_remake_elf)
 
 # Generate linker list symbols references to force compiler to not optimize
 # them away when compiling with LTO
