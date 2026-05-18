@@ -338,7 +338,7 @@ static void *cached_entry_to_item(struct smem_private_entry *e)
 }
 
 /* Pointer to the one and only smem handle */
-static struct qcom_smem *__smem;
+static struct qcom_smem *__smem __section(".data");
 
 static int qcom_smem_alloc_private(struct qcom_smem *smem,
 				   struct smem_partition_header *phdr,
