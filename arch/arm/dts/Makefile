@@ -28,9 +28,11 @@ dtb-$(CONFIG_TARGET_IPQ5210) += ipq5210-emulation.dtb \
 
 endif
 dtb-$(CONFIG_TARGET_IPQ9650) += ipq9650-emulation.dtb \
-                                ipq9650-rdp488.dtb \
-                                ipq9650-rdp489.dtb \
-                                ipq9650-rdp506.dtb \
+				ipq9650-rdp488.dtb \
+				ipq9650-rdp489.dtb \
+				ipq9650-rdp506.dtb \
+				ipq9650-rdp490.dtb \
+				ipq9650-rdp491.dtb \
 				ipq9650-db-ju01.dtb \
 				ipq9650-db-ju01-c1.dtb \
 				ipq9650-db-ju02.dtb
