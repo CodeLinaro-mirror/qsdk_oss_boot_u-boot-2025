@@ -37,6 +37,8 @@ dtb-$(CONFIG_TARGET_IPQ9650) += ipq9650-emulation.dtb \
 				ipq9650-db-ju01-c1.dtb \
 				ipq9650-db-ju02.dtb
 
+dtb-$(CONFIG_TARGET_IPQ5610) += ipq5610-emulation.dtb
+
 dtb-$(CONFIG_TARGET_SMARTWEB) += at91sam9260-smartweb.dtb
 dtb-$(CONFIG_TARGET_TAURUS) += at91sam9g20-taurus.dtb
 dtb-$(CONFIG_TARGET_CORVUS) += at91sam9g45-corvus.dtb
