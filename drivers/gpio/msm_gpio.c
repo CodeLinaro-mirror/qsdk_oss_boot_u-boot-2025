@@ -209,6 +209,7 @@ static int msm_gpio_get_function(struct udevice *dev, unsigned int gpio)
 static const struct dm_gpio_ops gpio_msm_ops = {
 	.set_flags		= msm_gpio_set_flags,
 	.get_value		= msm_gpio_get_value,
+	.set_value		= msm_gpio_set_value,
 	.get_function		= msm_gpio_get_function,
 };
 
