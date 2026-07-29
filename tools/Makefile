@@ -153,6 +153,9 @@ dumpimage-mkimage-objs := aisimage.o \
 			$(AES_OBJS-y)
 
 dumpimage-objs := $(dumpimage-mkimage-objs) dumpimage.o
+ifdef CONFIG_SYSUPGRADE_HELPER
+dumpimage-objs += sysupgrade.o
+endif
 mkimage-objs   := $(dumpimage-mkimage-objs) mkimage.o
 fit_info-objs   := $(dumpimage-mkimage-objs) fit_info.o
 fit_check_sign-objs   := $(dumpimage-mkimage-objs) fit_check_sign.o
