@@ -41,6 +41,7 @@ struct qcom_pcie_ops {
 	int (*config_sid)(struct qcom_pcie *priv);
 	int (*clear_sid)(struct qcom_pcie *priv);
 	const struct pcie_sku *sku;
+	u32 slv_addr_space_size;
 };
 
 #define NUM_SUPPLIES	2
@@ -132,6 +133,7 @@ struct qcom_pcie {
 
 /* PARF_SLV_ADDR_SPACE_SIZE register value */
 #define SLV_ADDR_SPACE_SZ			0x10000000
+#define SLV_ADDR_SPACE_SZ_1_27_0		0x08000000
 
 /* PARF_MHI_CLOCK_RESET_CTRL register fields */
 #define AHB_CLK_EN				BIT(0)
@@ -465,6 +467,16 @@ static int qcom_pcie_init_port(struct udevice *dev)
 	val |= EN;
 	writel(val, priv->parf + PARF_AXI_MSTR_WR_ADDR_HALT_V2);
 
+	/*
+	 * The reset value of PARF_SLV_ADDR_SPACE_SIZE can be smaller than
+	 * the address window decoded by the RC, which makes the RC config
+	 * space alias within that window. Program it explicitly when the
+	 * SoC provides a size.
+	 */
+	if (priv->ops && priv->ops->slv_addr_space_size)
+		writel(priv->ops->slv_addr_space_size,
+		       priv->parf + PARF_SLV_ADDR_SPACE_SIZE);
+
 	ret = generic_phy_power_on(&priv->phy);
 	if (ret) {
 		dev_err(dev, "failed to power on phy (%d)\n", ret);
@@ -732,6 +744,7 @@ static const struct qcom_pcie_ops ops_ipq5210 = {
 	.config_sid = NULL,
 	.sku = NULL,
 	.clear_sid = qcom_pcie_clear_sidtable,
+	.slv_addr_space_size = SLV_ADDR_SPACE_SZ_1_27_0,
 };
 
 static const struct qcom_pcie_ops ops_ipq9650 = {
