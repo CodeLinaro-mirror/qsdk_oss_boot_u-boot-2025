@@ -34,6 +34,7 @@ dtb-$(CONFIG_TARGET_IPQ9650) += ipq9650-emulation.dtb \
 				ipq9650-rdp490.dtb \
 				ipq9650-rdp491.dtb \
 				ipq9650-rdp507.dtb \
+				ipq9650-rdp525.dtb \
 				ipq9650-rdp529.dtb \
 				ipq9650-rdp530.dtb \
 				ipq9650-rdp532.dtb \
