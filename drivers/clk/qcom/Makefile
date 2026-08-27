@@ -13,6 +13,7 @@ obj-$(CONFIG_CLK_QCOM_IPQ5332) += clock-ipq5332.o
 obj-$(CONFIG_CLK_QCOM_IPQ5424) += clock-ipq5424.o
 obj-$(CONFIG_CLK_QCOM_NSSCC_QCE2204) += nsscc-qce2204.o
 obj-$(CONFIG_CLK_QCOM_IPQ5210) += clock-ipq5210.o
+obj-$(CONFIG_CLK_QCOM_IPQ5610) += clock-ipq5610.o
 obj-$(CONFIG_CLK_QCOM_IPQ9574) += clock-ipq9574.o
 obj-$(CONFIG_CLK_QCOM_IPQ9650) += clock-ipq9650.o
 obj-$(CONFIG_CLK_QCOM_QCM2290) += clock-qcm2290.o
