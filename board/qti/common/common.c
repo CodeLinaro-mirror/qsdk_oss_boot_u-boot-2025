@@ -32,6 +32,7 @@
 #include <wdt.h>
 #include <asm/io.h>
 #endif
+#include <bootstage.h>
 
 #include "ipq_board.h"
 
@@ -1054,7 +1055,9 @@ int init_ubi_part(void)
 		if (ret)
 			return -EPERM;
 
+		bootstage_mark_name(BOOTSTAGE_ID_ALLOC, "before_ubi_part");
 		ret = ubi_part(CFG_UBI_FS_NAME, NULL);
+		bootstage_mark_name(BOOTSTAGE_ID_ALLOC, "after_ubi_part");
 		if (ret)
 			return -EPERM;
 	} else

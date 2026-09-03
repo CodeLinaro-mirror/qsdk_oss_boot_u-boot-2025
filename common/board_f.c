@@ -648,8 +648,10 @@ static int reloc_fdt(void)
 static int reloc_bootstage(void)
 {
 #ifdef CONFIG_BOOTSTAGE
+#if 0
 	if (gd->flags & GD_FLG_SKIP_RELOC)
 		return 0;
+#endif
 	if (gd->new_bootstage) {
 		int size = bootstage_get_size();
 
