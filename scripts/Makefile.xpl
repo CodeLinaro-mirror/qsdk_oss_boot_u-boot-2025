@@ -281,27 +281,35 @@ else
 dt_dir := arch/$(ARCH)/dts
 endif
 
-# SPL RDP variant outputs, enabled by CONFIG_SPL_RDP_IMAGE_GENERATION:
-#   - discover <profile>-rdp*.dts under the active DTS directory/profile
-#   - fdtgrep each one down to bootph-tagged nodes only -> <profile>-rdp*-spl.dtb
-#   - append the pad and pruned DTB to u-boot-spl-nodtb.bin -> <profile>-rdp*.img
-#   - wrap each .img into an ELF -> u-boot-spl-<profile>-rdp*.elf
+# SPL profile variant outputs, enabled by CONFIG_SPL_RDP_IMAGE_GENERATION:
+#   - discover <profile>-*.dtb from the active DTS Makefile
+#   - fdtgrep each one down to bootph-tagged nodes only -> <variant>-spl.dtb
+#   - append the pad and pruned DTB to u-boot-spl-nodtb.bin -> <variant>.img
+#   - wrap each .img into an ELF -> u-boot-spl-<variant>.elf
 #
 # Keep this SPL-only since the flow is defined around u-boot-spl-nodtb.bin.
 ifeq ($(CONFIG_SPL_BUILD)$(CONFIG_SPL_RDP_IMAGE_GENERATION),yy)
 SPL_DEFAULT_DTB := $(patsubst "%",%,$(CONFIG_DEFAULT_DEVICE_TREE))
 SPL_RDP_PROFILE := $(patsubst %-u-boot-spl,%,$(SPL_DEFAULT_DTB))
 SPL_RDP_PROFILE := $(word 1,$(subst -rdp, ,$(SPL_RDP_PROFILE)))
-SPL_RDP_DTB_GLOB := $(if $(SPL_RDP_PROFILE),\
-	$(srctree)/$(dt_dir)/$(SPL_RDP_PROFILE)-rdp*.dts)
-SPL_RDP_DTB_SEARCH := $(if $(SPL_RDP_DTB_GLOB),$(SPL_RDP_DTB_GLOB),\
-	(empty - SPL_RDP_PROFILE not derived from CONFIG_DEFAULT_DEVICE_TREE))
-SPL_RDP_DTB_SRCS := $(wildcard $(SPL_RDP_DTB_GLOB))
+SPL_RDP_DTB_MAKEFILE := $(srctree)/$(dt_dir)/Makefile
+SPL_RDP_DTB_NAMES := $(shell awk -v profile="$(SPL_RDP_PROFILE)" '\
+	{ line = line " " $$0; if ($$0 !~ /\\$$/) { \
+		gsub(/\\/, " ", line); n = split(line, fields); \
+		for (i = 1; i <= n; i++) \
+			if (fields[i] ~ ("(^|/)" profile "-.*\\.dtb$$") && !seen[fields[i]]++) \
+				print fields[i]; \
+		line = ""; \
+	} }' $(SPL_RDP_DTB_MAKEFILE))
+SPL_RDP_DTB_NAMES := $(filter-out $(SPL_DEFAULT_DTB).dtb \
+	%/$(notdir $(SPL_DEFAULT_DTB)).dtb,$(SPL_RDP_DTB_NAMES))
+SPL_RDP_DTB_SRCS := $(addprefix $(srctree)/$(dt_dir)/,\
+	$(patsubst %.dtb,%.dts,$(SPL_RDP_DTB_NAMES)))
 SPL_RDP_VARIANTS := $(basename $(notdir $(SPL_RDP_DTB_SRCS)))
 ifeq ($(strip $(SPL_RDP_VARIANTS)),)
-$(warning CONFIG_SPL_RDP_IMAGE_GENERATION=y but no SPL RDP variants were found: \
+$(warning CONFIG_SPL_RDP_IMAGE_GENERATION=y but no SPL variants were found: \
 	CONFIG_DEFAULT_DEVICE_TREE=$(SPL_DEFAULT_DTB), profile=$(SPL_RDP_PROFILE), \
-	searched=$(SPL_RDP_DTB_SEARCH))
+	searched=$(SPL_RDP_DTB_MAKEFILE))
 endif
 SPL_RDP_ELFS := $(addprefix $(obj)/$(SPL_BIN)-,$(addsuffix .elf,$(SPL_RDP_VARIANTS)))
 SPL_RDP_IMGS := $(addprefix $(obj)/,$(addsuffix .img,$(SPL_RDP_VARIANTS)))
@@ -730,6 +738,7 @@ endef
 $(obj)/$(SPL_BIN)-elf.lds: FORCE
 	$(call if_changed,spl_elf_lds)
 
+ifeq ($(CONFIG_$(PHASE_)REMAKE_ELF),y)
 # Wrap the xPL binary into an ELF file.
 # Step 1: objcopy converts the raw binary to a relocatable ELF object and
 #         sets the load/start address to SPL_ELF_TEXT_BASE.
@@ -749,6 +758,7 @@ $(obj)/$(SPL_BIN)-elf.o: $(obj)/$(SPL_BIN).bin FORCE
 
 $(obj)/$(SPL_BIN).elf: $(obj)/$(SPL_BIN)-elf.o $(obj)/$(SPL_BIN)-elf.lds FORCE
 	$(call if_changed,spl_remake_elf)
+endif
 endif
 
 ifeq ($(CONFIG_SPL_BUILD)$(CONFIG_SPL_RDP_IMAGE_GENERATION),yy)
